@@ -79,7 +79,20 @@ class RoomComponent extends Component
 
     public function storeOrUpdate()
     {
-        $this->validate();
+        $this->validate(
+            $this->rules,
+            [
+                'rentalprice.required' => 'El monto de alquiler es obligatorio.',
+                'lightprice.required' => 'El monto de luz es obligatorio.',
+                'waterprice.required' => 'El monto de agua es obligatorio.',
+                'number.required' => 'El número de habitación es obligatorio.',
+                'number.numeric' => 'El número de habitación debe ser numérico.',
+                'type_id.required' => 'El tipo de habitación es obligatorio.',
+                'type_id.numeric' => 'El tipo de habitación debe ser numérico.',
+                'property_id.required' => 'La propiedad es obligatoria.',
+                'property_id.numeric' => 'La propiedad debe ser numérica.'
+            ]
+        );
 
         Room::updateOrCreate(
             ['id' => $this->isEditMode ? $this->room_id : null],

@@ -123,7 +123,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="lightprice">Precio Luz</label>
-                            <input type="text" class="form-control" placeholder="Ciudad" id="Precio Luz"
+                            <input type="text" class="form-control" placeholder="Precio Luz" id="lightprice"
                                 wire:model="lightprice">
                             @error('lightprice')
                                 <span class="text-danger">{{ $message }}</span>
