@@ -30,8 +30,8 @@ class ClientComponent extends Component
             'state' => 'nullable|string',
             'postal_code' => 'nullable|string',
             'country' => 'nullable|string',
-            'identification_number' => 'nullable|string',
-            'identification_type' => 'nullable|string'
+            'identification_number' => 'required|string',
+            'identification_type' => 'required|string'
         ];
 
         if ($this->isEditMode) {
@@ -75,7 +75,18 @@ class ClientComponent extends Component
 
     public function storeOrUpdate()
     {
-        $this->validate();
+        $this->validate(
+            $this->rules(),
+            [
+                'full_name.required' => 'El nombre completo es obligatorio.',
+                'city.required' => 'La ciudad es obligatoria.',
+                'address.required' => 'La dirección es obligatoria.',
+                'phone.required' => 'El teléfono es obligatorio.',
+                'gender.required' => 'El género es obligatorio.',
+                'identification_number.required' => 'El número de identificación es obligatorio.',
+                'identification_type.required' => 'El tipo de identificación es obligatorio.'
+            ]
+        );
 
         Client::updateOrCreate(
             ['id' => $this->client_id],

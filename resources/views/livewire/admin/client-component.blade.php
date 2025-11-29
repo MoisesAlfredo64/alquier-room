@@ -21,8 +21,8 @@
                 <tr>
                     <th>Nombre Completo</th>
                     <th>Teléfono</th>
+                    <th>Número de Identificación</th>
                     <th>Ciudad</th>
-                    <th>Dirección</th>
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -36,8 +36,8 @@
                         <tr>
                             <td>{{ $client->full_name }}</td>
                             <td>{{ $client->phone }}</td>
+                            <td>{{ $client->identification_number }}</td>
                             <td>{{ $client->city }}</td>
-                            <td>{{ $client->address }}</td>
                             <td>
                                 <button wire:click="edit({{ $client->id }})" class="btn btn-sm btn-primary"
                                     data-bs-toggle="modal" data-bs-target="#clientModal">
