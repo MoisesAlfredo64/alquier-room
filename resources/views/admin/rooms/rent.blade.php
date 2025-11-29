@@ -16,14 +16,12 @@
                         <tr>
                             <th>Precio Alquiler</th>
                             <th>Precio Luz</th>
-                            <th>Precio Agua</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
                         <tr class="table-primary">
                             <td>{{ $room->rentalprice }}</td>
                             <td>{{ $room->lightprice }}</td>
-                            <td>{{ $room->waterprice }}</td>
                         </tr>
                     </tbody>
                 </table>

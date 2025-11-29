@@ -90,6 +90,76 @@
         {{ $payments->links() }}
     </div>
 
+    <!-- Sección de Lecturas de Luz -->
+    <div class="card mt-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Lecturas de Luz</h5>
+        </div>
+        <div class="card-body">
+            @if($lastReading)
+                <div class="alert alert-info">
+                    <h6>Última Lectura Registrada:</h6>
+                    <p><strong>Fecha:</strong> {{ $lastReading->reading_date->format('d/m/Y') }}</p>
+                    <p><strong>Consumo:</strong> {{ number_format($lastReading->consumption, 2) }} KWH</p>
+                    <p><strong>Importe:</strong> ${{ number_format($lastReading->total_amount, 2) }}</p>
+                </div>
+            @else
+                <div class="alert alert-warning">
+                    No hay lecturas de luz registradas para este inquilino.
+                </div>
+            @endif
+
+            <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#electricityModal"
+                wire:click="resetInputFields">
+                <i class="fas fa-bolt"></i> Registrar Lectura de Luz
+            </button>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Lectura Inicial</th>
+                            <th>Lectura Final</th>
+                            <th>Consumo (KWH)</th>
+                            <th>Precio KWH</th>
+                            <th>Importe</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if ($electricityReadings->isEmpty())
+                            <tr>
+                                <td colspan="7" class="text-center">No hay lecturas registradas.</td>
+                            </tr>
+                        @else
+                            @foreach ($electricityReadings as $reading)
+                                <tr>
+                                    <td>{{ $reading->reading_date->format('d/m/Y') }}</td>
+                                    <td>{{ number_format($reading->initial_reading, 2) }}</td>
+                                    <td>{{ number_format($reading->final_reading, 2) }}</td>
+                                    <td>{{ number_format($reading->consumption, 2) }}</td>
+                                    <td>${{ number_format($reading->kwh_price, 2) }}</td>
+                                    <td>${{ number_format($reading->total_amount, 2) }}</td>
+                                    <td>
+                                        <button wire:click="exportElectricityReading({{ $reading->id }})" 
+                                            class="btn btn-sm btn-success">
+                                            <i class="fas fa-file-excel"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-2">
+                {{ $electricityReadings->links() }}
+            </div>
+        </div>
+    </div>
+
     <!-- Modal -->
     <div wire:ignore.self class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel"
         aria-hidden="true">
@@ -122,6 +192,64 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Lectura de Luz -->
+    <div wire:ignore.self class="modal fade" id="electricityModal" tabindex="-1" aria-labelledby="electricityModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="electricityModalLabel">Registrar Lectura de Luz</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="reading_date" class="form-label">Fecha de Lectura</label>
+                            <input type="date" class="form-control" id="reading_date" wire:model="reading_date">
+                            @error('reading_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="initial_reading" class="form-label">Lectura Inicial (KWH)</label>
+                                <input type="number" step="0.01" class="form-control" id="initial_reading" 
+                                    wire:model="initial_reading" wire:change="calculateConsumption">
+                                @error('initial_reading')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="final_reading" class="form-label">Lectura Final (KWH)</label>
+                                <input type="number" step="0.01" class="form-control" id="final_reading" 
+                                    wire:model="final_reading" wire:change="calculateConsumption">
+                                @error('final_reading')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="kwh_price" class="form-label">Precio por KWH</label>
+                            <input type="number" step="0.01" class="form-control" id="kwh_price" 
+                                wire:model="kwh_price" wire:change="calculateConsumption">
+                            @error('kwh_price')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="alert alert-info">
+                            <p><strong>Consumo:</strong> {{ number_format($consumption, 2) }} KWH</p>
+                            <p><strong>Importe Total:</strong> ${{ number_format($electricity_amount, 2) }}</p>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" wire:click="storeElectricityReading">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -133,7 +261,13 @@
             setTimeout(() => {
                 window.open(data[0].pdfPath, '_blank');
             }, 1000);
+        });
 
+        Livewire.on('readingStored', function() {
+            let modal = bootstrap.Modal.getInstance(document.getElementById('electricityModal'));
+            if (modal) {
+                modal.hide();
+            }
         });
     });
 </script>

@@ -20,25 +20,22 @@
                             <tr>
                                 <th>Precio Alquiler</th>
                                 <th>Precio Luz</th>
-                                <th>Precio Agua</th>
                             </tr>
                         </thead>
                         @php
                             $rentalPrice = $rent->room->rentalprice;
                             $lightPrice = $rent->room->lightprice;
-                            $waterPrice = $rent->room->waterprice;
 
-                            $total = number_format($rentalPrice + $lightPrice + $waterPrice, 2);
+                            $total = number_format($rentalPrice + $lightPrice, 2);
                         @endphp
                         <tbody class="table-group-divider">
                             <tr class="table-primary">
                                 <td>{{ number_format($rent->room->rentalprice, 2) }}</td>
                                 <td>{{ number_format($rent->room->lightprice, 2) }}</td>
-                                <td>{{ number_format($rent->room->waterprice, 2) }}</td>
                             </tr>
                             <tr>
                                 <td>TOTAL</td>
-                                <td colspan="2">
+                                <td>
                                     <h3>{{ $total }}</h3>
                                 </td>
                             </tr>
