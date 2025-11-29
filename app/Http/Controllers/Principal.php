@@ -64,6 +64,31 @@ class Principal extends Controller
             'months' => $labels
         ];
 
-        return view('admin.dashboard', compact('data'));
+        // Habitaciones próximas a pago (faltan 5 días)
+        $today = now();
+        $limitDate = $today->copy()->addDays(5);
+        $proximosPagos = [];
+        $rentsWithRoom = Rent::with(['room', 'client', 'payments'])
+            ->where('status', 1)
+            ->get();
+
+        foreach ($rentsWithRoom as $rent) {
+            // Obtener el último pago realizado
+            $lastPayment = $rent->payments->sortByDesc('created_at')->first();
+            // Si no hay pagos, usar la fecha de creación del alquiler
+            $lastDate = $lastPayment ? $lastPayment->created_at : $rent->created_at;
+            // Suponiendo que el pago es mensual
+            $nextDueDate = \Carbon\Carbon::parse($lastDate)->addMonth();
+            if ($nextDueDate->isBetween($today, $limitDate)) {
+                $proximosPagos[] = [
+                    'room_number' => $rent->room->number,
+                    'client_name' => $rent->client->full_name,
+                    'rental_price' => $rent->room->rentalprice,
+                    'due_date' => $nextDueDate->format('d/m/Y')
+                ];
+            }
+        }
+
+        return view('admin.dashboard', compact('data', 'proximosPagos'));
     }
 }

@@ -4,6 +4,23 @@
 
 @section('content')
     <div class="row">
+            @if(!empty($proximosPagos) && count($proximosPagos) > 0)
+                <div class="row mt-4">
+                    <h4 class="mb-3">Habitaciones con fecha a vencer</h4>
+                    @foreach($proximosPagos as $pago)
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-primary shadow h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Habitación Nº {{ $pago['room_number'] }}</h5>
+                                    <p class="mb-1"><strong>Inquilino:</strong> {{ $pago['client_name'] }}</p>
+                                    <p class="mb-1"><strong>Monto alquiler:</strong> ${{ number_format($pago['rental_price'], 2) }}</p>
+                                    <p class="mb-1"><strong>Fecha límite de pago:</strong> {{ $pago['due_date'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         <div class="col-md-4">
             <div class="card bg-gradient-danger card-img-holder text-white">
                 <div class="card-body">
