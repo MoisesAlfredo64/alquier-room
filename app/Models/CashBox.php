@@ -16,4 +16,22 @@ class CashBox extends Model
         'status',
         'user_id'
     ];
+
+    // Relación con pagos (ingresos)
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'cashbox_id');
+    }
+
+    // Relación con gastos (egresos)
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class, 'cashbox_id');
+    }
+
+    // Relación con usuario
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

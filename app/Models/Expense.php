@@ -15,4 +15,9 @@ class Expense extends Model
         'photo',
         'cashbox_id'
     ];
+
+    public function cashbox()
+    {
+        return $this->belongsTo(CashBox::class);
+    }
 }

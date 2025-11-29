@@ -23,6 +23,79 @@
         </div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($cajaExiste)
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Movimientos de Caja Abierta</h5>
+                <button wire:click="exportMovements" class="btn btn-sm btn-light">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <strong>Monto Inicial:</strong> {{ number_format($cajaExiste->initial_amount, 2) }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <strong>Total Ingresos:</strong> {{ number_format($totalIngresos, 2) }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger">
+                            <strong>Total Egresos:</strong> {{ number_format($totalEgresos, 2) }}
+                        </div>
+                    </div>
+                </div>
+
+                @if ($movimientos->isEmpty())
+                    <div class="alert alert-warning">
+                        No hay movimientos registrados en esta caja.
+                    </div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Fecha/Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($movimientos as $movimiento)
+                                    <tr>
+                                        <td>
+                                            @if ($movimiento['tipo'] == 'Ingreso')
+                                                <span class="badge bg-success">{{ $movimiento['tipo'] }}</span>
+                                            @else
+                                                <span class="badge bg-danger">{{ $movimiento['tipo'] }}</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $movimiento['descripcion'] }}</td>
+                                        <td>{{ number_format($movimiento['monto'], 2) }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($movimiento['fecha'])->format('d/m/Y H:i') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
+    <h5 class="mb-3">Historial de Cajas</h5>
+
     <table class="table table-bordered">
         <thead>
             <tr>

@@ -4,8 +4,11 @@ namespace App\Livewire\Admin;
 
 use App\Models\CashBox;
 use App\Models\Expense;
+use App\Models\Payment;
+use App\Exports\CashMovementsExport;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CashComponent extends Component
 {
@@ -26,12 +29,56 @@ class CashComponent extends Component
     {
         $this->cajaExiste = CashBox::where('status', 1)->first();
 
+        // Obtener movimientos de caja abierta si existe
+        $movimientos = collect();
+        $totalIngresos = 0;
+        $totalEgresos = 0;
+
+        if ($this->cajaExiste) {
+            // Obtener pagos (ingresos)
+            $ingresos = Payment::with('rent.client', 'rent.room')
+                ->where('cashbox_id', $this->cajaExiste->id)
+                ->get()
+                ->map(function($payment) {
+                    return [
+                        'tipo' => 'Ingreso',
+                        'descripcion' => 'Pago alquiler - ' . 
+                            ($payment->rent->client->full_name ?? 'N/A') . 
+                            ' (Habitación ' . ($payment->rent->room->number ?? 'N/A') . ')',
+                        'monto' => $payment->amount,
+                        'fecha' => $payment->created_at
+                    ];
+                });
+
+            // Obtener gastos (egresos)
+            $egresos = Expense::where('cashbox_id', $this->cajaExiste->id)
+                ->get()
+                ->map(function($expense) {
+                    return [
+                        'tipo' => 'Egreso',
+                        'descripcion' => $expense->description,
+                        'monto' => $expense->amount,
+                        'fecha' => $expense->created_at
+                    ];
+                });
+
+            // Combinar y ordenar
+            $movimientos = $ingresos->concat($egresos)->sortByDesc('fecha');
+            $totalIngresos = $ingresos->sum('monto');
+            $totalEgresos = $egresos->sum('monto');
+        }
+
         $cashboxs = CashBox::where('initial_amount', 'like', '%' . $this->searchTerm . '%')
             ->orWhere('status', 'like', '%' . $this->searchTerm . '%')
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return view('livewire.admin.cash-component', ['cashboxs' => $cashboxs])
+        return view('livewire.admin.cash-component', [
+            'cashboxs' => $cashboxs,
+            'movimientos' => $movimientos,
+            'totalIngresos' => $totalIngresos,
+            'totalEgresos' => $totalEgresos
+        ])
             ->extends('admin.layouts.app');
     }
 
@@ -87,5 +134,18 @@ class CashComponent extends Component
         $this->cajaExiste->spent = $gasto;
         $this->cajaExiste->update();
         session(null)->flash('message', 'Caja Cerrado.');
+    }
+
+    public function exportMovements()
+    {
+        if (!$this->cajaExiste) {
+            session()->flash('error', 'No hay caja abierta para exportar.');
+            return;
+        }
+
+        return Excel::download(
+            new CashMovementsExport($this->cajaExiste->id), 
+            'movimientos_caja_' . date('Y-m-d') . '.xlsx'
+        );
     }
 }

@@ -19,4 +19,9 @@ class Payment extends Model
     {
         return $this->belongsTo(Rent::class);
     }
+
+    public function cashbox()
+    {
+        return $this->belongsTo(CashBox::class);
+    }
 }
