@@ -11,8 +11,8 @@ class Room extends Model
 
     protected $fillable = [
         'rentalprice',
-        'lightprice',
         'number',
+        'people_count',
         'property_id',
         'type_id',
     ];

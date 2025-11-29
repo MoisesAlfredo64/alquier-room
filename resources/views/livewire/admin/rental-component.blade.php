@@ -33,7 +33,7 @@
                                 {{ $rent->room->rentalprice }} <span class="text-secondary">/ Mensual</span>
                             </h5>
                             <ul class="list-unstyled">
-                                <li><b class="text-dark">Precio luz:</b> {{ $rent->room->lightprice }}</li>
+                                
                                 <li><b class="text-dark">Precio Agua:</b> {{ $rent->room->waterprice }}</li>
                                 <li><b class="text-dark">Fecha:</b> {{ $rent->created_at }}</li>
                             </ul>

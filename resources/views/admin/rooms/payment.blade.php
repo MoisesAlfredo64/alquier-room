@@ -19,19 +19,16 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Precio Alquiler</th>
-                                <th>Precio Luz</th>
                             </tr>
                         </thead>
                         @php
                             $rentalPrice = $rent->room->rentalprice;
-                            $lightPrice = $rent->room->lightprice;
 
-                            $total = number_format($rentalPrice + $lightPrice, 2);
+                            $total = number_format($rentalPrice, 2);
                         @endphp
                         <tbody class="table-group-divider">
                             <tr class="table-primary">
                                 <td>{{ number_format($rent->room->rentalprice, 2) }}</td>
-                                <td>{{ number_format($rent->room->lightprice, 2) }}</td>
                             </tr>
                             <tr>
                                 <td>TOTAL</td>

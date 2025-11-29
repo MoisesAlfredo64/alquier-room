@@ -13,7 +13,7 @@ class RoomComponent extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
-    public $rentalprice, $lightprice, $number, $type_id, $property_id, $room_id;
+    public $rentalprice, $number, $people_count, $type_id, $property_id, $room_id;
     public $isEditMode = false;
     public $searchTerm;
     public $types = [];
@@ -23,8 +23,8 @@ class RoomComponent extends Component
 
     protected $rules = [
         'rentalprice' => 'required',
-        'lightprice' => 'required',
         'number' => 'required|numeric',
+        'people_count' => 'required|integer|min:1',
         'type_id' => 'required|numeric',
         'property_id' => 'required|numeric',
     ];
@@ -40,7 +40,6 @@ class RoomComponent extends Component
         $rooms = Room::with(['property', 'type'])
             ->where(function ($query) {
                 $query->where('rentalprice', 'like', '%' . $this->searchTerm . '%')
-                    ->orWhere('lightprice', 'like', '%' . $this->searchTerm . '%')
                     ->orWhereHas('property', function ($query) {
                         $query->where('name', 'like', '%' . $this->searchTerm . '%');
                     })
@@ -66,8 +65,8 @@ class RoomComponent extends Component
     public function resetInputFields()
     {
         $this->rentalprice = '';
-        $this->lightprice = '';
         $this->number = '';
+        $this->people_count = 1;
         $this->type_id = '';
         $this->property_id = '';
         $this->room_id = '';
@@ -80,9 +79,11 @@ class RoomComponent extends Component
             $this->rules,
             [
                 'rentalprice.required' => 'El monto de alquiler es obligatorio.',
-                'lightprice.required' => 'El monto de luz es obligatorio.',
                 'number.required' => 'El número de habitación es obligatorio.',
                 'number.numeric' => 'El número de habitación debe ser numérico.',
+                'people_count.required' => 'La cantidad de personas es obligatoria.',
+                'people_count.integer' => 'La cantidad de personas debe ser un entero.',
+                'people_count.min' => 'La cantidad de personas debe ser al menos 1.',
                 'type_id.required' => 'El tipo de habitación es obligatorio.',
                 'type_id.numeric' => 'El tipo de habitación debe ser numérico.',
                 'property_id.required' => 'La propiedad es obligatoria.',
@@ -94,8 +95,8 @@ class RoomComponent extends Component
             ['id' => $this->isEditMode ? $this->room_id : null],
             [
                 'rentalprice' => $this->rentalprice,
-                'lightprice' => $this->lightprice,
                 'number' => $this->number,
+                'people_count' => $this->people_count,
                 'type_id' => $this->type_id,
                 'property_id' => $this->property_id,
             ]
@@ -114,8 +115,8 @@ class RoomComponent extends Component
         $room = Room::findOrFail($id);
         $this->room_id = $id;
         $this->rentalprice = $room->rentalprice;
-        $this->lightprice = $room->lightprice;
         $this->number = $room->number;
+        $this->people_count = $room->people_count;
         $this->type_id = $room->type_id;
         $this->property_id = $room->property_id;
         $this->isEditMode = true;

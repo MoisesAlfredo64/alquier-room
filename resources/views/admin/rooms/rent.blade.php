@@ -15,13 +15,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>Precio Alquiler</th>
-                            <th>Precio Luz</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
                         <tr class="table-primary">
                             <td>{{ $room->rentalprice }}</td>
-                            <td>{{ $room->lightprice }}</td>
                         </tr>
                     </tbody>
                 </table>
