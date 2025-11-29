@@ -47,9 +47,7 @@
                                     {{ old('remember') ? 'checked' : '' }}> Mantenme registrado
                             </label>
                         </div>
-                        @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="auth-link text-white">¿Has olvidado tu contraseña?</a>
-                        @endif
+                            <!-- Opción 'Has olvidado tu contraseña' eliminada -->
                     </div>
                 </form>
             </div>

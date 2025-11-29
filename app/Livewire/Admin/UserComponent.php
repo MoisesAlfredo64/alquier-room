@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
 
 class UserComponent extends Component
 {
@@ -57,6 +58,12 @@ class UserComponent extends Component
 
     public function storeOrUpdate()
     {
+        // Solo Moises puede crear, editar o eliminar usuarios
+        if (\Auth::user()->name !== 'Moises') {
+            session(null)->flash('message', 'No tienes permisos para realizar esta acción.');
+            return;
+        }
+
         // Validar los datos
         $this->validate();
 
@@ -100,6 +107,11 @@ class UserComponent extends Component
 
     public function delete($id)
     {
+        // Solo Moises puede eliminar usuarios
+        if (\Auth::user()->name !== 'Moises') {
+            session(null)->flash('message', 'No tienes permisos para eliminar usuarios.');
+            return;
+        }
         $user = User::find($id);
         if ($user) {
             $user->delete();

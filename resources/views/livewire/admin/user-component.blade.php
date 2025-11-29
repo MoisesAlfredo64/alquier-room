@@ -4,8 +4,10 @@
             <input type="text" wire:model.live="searchTerm" class="form-control" placeholder="Buscar...">
         </div>
         <div class="col-md-6 text-end">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal"
-                wire:click="resetInputFields"><i class="fas fa-plus-circle"></i></button>
+            @if(auth()->user()->name === 'Moises')
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal"
+                    wire:click="resetInputFields"><i class="fas fa-plus-circle"></i></button>
+            @endif
         </div>
     </div>
 
@@ -37,13 +39,15 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->created_at }}</td>
                             <td>
-                                <button wire:click="edit({{ $user->id }})" class="btn btn-sm btn-primary"
-                                    data-bs-toggle="modal" data-bs-target="#userModal">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $user->id }})">
-                                    <i class="fas fa-times-circle"></i>
-                                </button>
+                                @if(auth()->user()->name === 'Moises')
+                                    <button wire:click="edit({{ $user->id }})" class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal" data-bs-target="#userModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $user->id }})">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -107,8 +111,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" wire:click.prevent="storeOrUpdate()"
-                        class="btn btn-sm btn-primary">{{ $isEditMode ? 'Actualizar' : 'Guardar' }}</button>
+                    @if(auth()->user()->name === 'Moises')
+                        <button type="button" wire:click.prevent="storeOrUpdate()"
+                            class="btn btn-sm btn-primary">{{ $isEditMode ? 'Actualizar' : 'Guardar' }}</button>
+                    @endif
                 </div>
             </div>
         </div>
