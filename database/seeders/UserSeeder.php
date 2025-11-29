@@ -20,4 +20,18 @@ class UserSeeder extends Seeder
             'password' => Hash::make('moises123')
         ]);
     }
+
+    public function up()
+    {
+        Schema::table('rooms', function (Blueprint $table) {
+            $table->dropColumn('waterprice');
+        });
+    }
+
+    public function down()
+    {
+        Schema::table('rooms', function (Blueprint $table) {
+            $table->decimal('waterprice', 10, 2)->nullable();
+        });
+    }
 }

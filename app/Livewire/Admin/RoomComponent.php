@@ -13,7 +13,7 @@ class RoomComponent extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
-    public $rentalprice, $lightprice, $waterprice, $number, $type_id, $property_id, $room_id;
+    public $rentalprice, $lightprice, $number, $type_id, $property_id, $room_id;
     public $isEditMode = false;
     public $searchTerm;
     public $types = [];
@@ -24,7 +24,6 @@ class RoomComponent extends Component
     protected $rules = [
         'rentalprice' => 'required',
         'lightprice' => 'required',
-        'waterprice' => 'required',
         'number' => 'required|numeric',
         'type_id' => 'required|numeric',
         'property_id' => 'required|numeric',
@@ -42,7 +41,6 @@ class RoomComponent extends Component
             ->where(function ($query) {
                 $query->where('rentalprice', 'like', '%' . $this->searchTerm . '%')
                     ->orWhere('lightprice', 'like', '%' . $this->searchTerm . '%')
-                    ->orWhere('waterprice', 'like', '%' . $this->searchTerm . '%')
                     ->orWhereHas('property', function ($query) {
                         $query->where('name', 'like', '%' . $this->searchTerm . '%');
                     })
@@ -69,7 +67,6 @@ class RoomComponent extends Component
     {
         $this->rentalprice = '';
         $this->lightprice = '';
-        $this->waterprice = '';
         $this->number = '';
         $this->type_id = '';
         $this->property_id = '';
@@ -84,7 +81,6 @@ class RoomComponent extends Component
             [
                 'rentalprice.required' => 'El monto de alquiler es obligatorio.',
                 'lightprice.required' => 'El monto de luz es obligatorio.',
-                'waterprice.required' => 'El monto de agua es obligatorio.',
                 'number.required' => 'El número de habitación es obligatorio.',
                 'number.numeric' => 'El número de habitación debe ser numérico.',
                 'type_id.required' => 'El tipo de habitación es obligatorio.',
@@ -99,7 +95,6 @@ class RoomComponent extends Component
             [
                 'rentalprice' => $this->rentalprice,
                 'lightprice' => $this->lightprice,
-                'waterprice' => $this->waterprice,
                 'number' => $this->number,
                 'type_id' => $this->type_id,
                 'property_id' => $this->property_id,
@@ -120,7 +115,6 @@ class RoomComponent extends Component
         $this->room_id = $id;
         $this->rentalprice = $room->rentalprice;
         $this->lightprice = $room->lightprice;
-        $this->waterprice = $room->waterprice;
         $this->number = $room->number;
         $this->type_id = $room->type_id;
         $this->property_id = $room->property_id;

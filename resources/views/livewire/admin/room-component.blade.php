@@ -35,7 +35,7 @@
                             <ul class="list-unstyled">
                                 <li><b class="text-dark">Tipo:</b> {{ $room->type->name }}</li>
                                 <li><b class="text-dark">Precio luz:</b> {{ $room->lightprice }}</li>
-                                <li><b class="text-dark">Precio Agua:</b> {{ $room->waterprice }}</li>
+                                <!-- Campo Precio Agua eliminado -->
                             </ul>
                             <div class="mb-2">
                                 <span class="badge bg-warning">N° {{ $room->number }}</span>
@@ -129,14 +129,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="form-group col-md-6">
-                            <label for="waterprice">Precio Agua</label>
-                            <input type="text" class="form-control" id="waterprice" placeholder="Precio Agua"
-                                wire:model="waterprice">
-                            @error('waterprice')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        <!-- Campo Precio Agua eliminado -->
                     </form>
                 </div>
                 <div class="modal-footer">
