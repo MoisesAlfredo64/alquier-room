@@ -34,11 +34,10 @@
                             </h5>
                             <ul class="list-unstyled">
                                 <li><b class="text-dark">Tipo:</b> {{ $room->type->name }}</li>
-                                <!-- Campo Precio luz eliminado -->
-                                <!-- Campo Precio Agua eliminado -->
                                 <li><b class="text-dark">Personas:</b> {{ $room->people_count }}</li>
                             </ul>
                             <div class="mb-2">
+                                <span class="badge bg-primary">{{ $room->room_number }}</span>
                                 <span class="badge bg-warning">N° {{ $room->number }}</span>
                             </div>
 
@@ -152,6 +151,9 @@
                 modal.hide();
             }
         });
+        Livewire.on('roomDeleteBlocked', function(message) {
+            Swal.fire('Acción bloqueada', message, 'error');
+        });
     });
 
     function confirmDelete(id) {
@@ -166,11 +168,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 @this.call('delete', id);
-                Swal.fire(
-                    'Eliminado!',
-                    'La habitacion ha sido eliminada.',
-                    'success'
-                );
+                // El mensaje de éxito o bloqueo se maneja vía eventos y flash
             }
         });
     }

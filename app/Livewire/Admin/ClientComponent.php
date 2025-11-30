@@ -45,13 +45,26 @@ class ClientComponent extends Component
 
     public function render()
     {
-        $clients = Client::where('full_name', 'like', '%' . $this->searchTerm . '%')
-            ->orWhere('city', 'like', '%' . $this->searchTerm . '%')
-            ->orWhere('address', 'like', '%' . $this->searchTerm . '%')
+        // Obtener IDs de clientes con alquileres activos
+        $activeClientIds = \App\Models\Rent::where('status', 1)
+            ->pluck('client_id')
+            ->toArray();
+
+        $clients = Client::query()
+            ->where(function ($q) {
+                $q->where('full_name', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('city', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('address', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('client_number', 'like', '%' . $this->searchTerm . '%');
+            })
+            ->orderByRaw('CASE WHEN id IN (' . implode(',', array_merge($activeClientIds, [0])) . ') THEN 0 ELSE 1 END')
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return view('livewire.admin.client-component', ['clients' => $clients])
+        return view('livewire.admin.client-component', [
+            'clients' => $clients,
+            'activeClientIds' => $activeClientIds
+        ])
             ->extends('admin.layouts.app');
     }
 
@@ -88,22 +101,30 @@ class ClientComponent extends Component
             ]
         );
 
+        $data = [
+            'full_name' => $this->full_name,
+            'date_of_birth' => $this->date_of_birth,
+            'gender' => $this->gender,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'postal_code' => $this->postal_code,
+            'country' => $this->country,
+            'identification_number' => $this->identification_number,
+            'identification_type' => $this->identification_type
+        ];
+
+        // Generar client_number si es nuevo cliente
+        if (!$this->isEditMode) {
+            $maxClientNumber = Client::max('client_number') ?? 0;
+            $data['client_number'] = $maxClientNumber + 1;
+        }
+
         Client::updateOrCreate(
             ['id' => $this->client_id],
-            [
-                'full_name' => $this->full_name,
-                'date_of_birth' => $this->date_of_birth,
-                'gender' => $this->gender,
-                'phone' => $this->phone,
-                'email' => $this->email,
-                'address' => $this->address,
-                'city' => $this->city,
-                'state' => $this->state,
-                'postal_code' => $this->postal_code,
-                'country' => $this->country,
-                'identification_number' => $this->identification_number,
-                'identification_type' => $this->identification_type
-            ]
+            $data
         );
 
         $message = $this->isEditMode ? 'Cliente actualizado exitosamente.' : 'Cliente creado con éxito.';
@@ -136,11 +157,37 @@ class ClientComponent extends Component
     public function delete($id)
     {
         $client = Client::find($id);
-        if ($client) {
-            $client->delete();
-            $this->dispatch('clientDeleted');
-        } else {
+        if (!$client) {
             session(null)->flash('message', 'Cliente no encontrado.');
+            return;
         }
+
+        // Verificar si tiene algún alquiler (activo o histórico)
+        $hasRents = \App\Models\Rent::where('client_id', $id)->exists();
+
+        if ($hasRents) {
+            $activeRent = \App\Models\Rent::where('client_id', $id)
+                ->where('status', 1)
+                ->with('room')
+                ->first();
+
+            if ($activeRent) {
+                $roomName = $activeRent->room && $activeRent->room->room_number 
+                    ? $activeRent->room->room_number 
+                    : ($activeRent->room ? 'Habitación ' . $activeRent->room->number : 'una habitación');
+                $msg = $client->full_name . ' no puede ser eliminado porque está ocupando ' . $roomName;
+            } else {
+                $msg = $client->full_name . ' no puede ser eliminado porque tiene alquileres registrados en el historial.';
+            }
+            
+            session(null)->flash('message', $msg);
+            $this->dispatch('clientDeleteBlocked', message: $msg);
+            return;
+        }
+
+        // Si no tiene alquileres, permitir eliminación
+        $client->delete();
+        $this->dispatch('clientDeleted');
+        session(null)->flash('message', 'Cliente eliminado exitosamente.');
     }
 }

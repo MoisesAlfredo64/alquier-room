@@ -10,6 +10,7 @@ class Rent extends Model
     use HasFactory;
 
     protected $fillable = [
+        'rent_number',
         'note',
         'client_id',
         'room_id',

@@ -10,6 +10,7 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = [
+        'client_number',
         'full_name',
         'date_of_birth',
         'gender',
@@ -21,7 +22,8 @@ class Client extends Model
         'postal_code',
         'country',
         'identification_number',
-        'identification_type'
+        'identification_type',
+        'is_active'
     ];
 
     // Relación con Rent

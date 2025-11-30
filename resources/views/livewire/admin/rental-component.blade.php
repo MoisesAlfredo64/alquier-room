@@ -25,16 +25,15 @@
                             {{ $rent->client->full_name }}
                         </div>
                         <div class="card-body position-relative">
-                            <!-- Número de habitación en la esquina superior derecha -->
-                            <div class="position-absolute top-0 end-0 p-3">
-                                <span class="badge bg-warning">N° {{ $rent->room->number }}</span>
+                            <!-- Número de alquiler y habitación en la esquina superior derecha -->
+                            <div class="position-absolute top-0 end-0 p-3 d-flex flex-column align-items-end gap-1">
+                                <span class="badge bg-warning">{{ $rent->room->room_number }}</span>
+                                <span class="badge bg-secondary">N° {{ $rent->room->number }}</span>
                             </div>
                             <h5 class="card-title fs-4">
                                 {{ $rent->room->rentalprice }} <span class="text-secondary">/ Mensual</span>
                             </h5>
                             <ul class="list-unstyled">
-                                
-                                <li><b class="text-dark">Precio Agua:</b> {{ $rent->room->waterprice }}</li>
                                 <li><b class="text-dark">Fecha:</b> {{ $rent->created_at }}</li>
                             </ul>
 

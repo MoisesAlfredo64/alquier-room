@@ -19,25 +19,35 @@
         <table class="table table-bordered" style="width: 100%">
             <thead>
                 <tr>
+                    <th>N° Cliente</th>
                     <th>Nombre Completo</th>
                     <th>Teléfono</th>
                     <th>Número de Identificación</th>
                     <th>Ciudad</th>
+                    <th>Estado</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @if ($clients->isEmpty())
                     <tr>
-                        <td colspan="4" class="text-center">No se encontraron clientes.</td>
+                        <td colspan="7" class="text-center">No se encontraron clientes.</td>
                     </tr>
                 @else
                     @foreach ($clients as $client)
                         <tr>
+                            <td>{{ $client->client_number }}</td>
                             <td>{{ $client->full_name }}</td>
                             <td>{{ $client->phone }}</td>
                             <td>{{ $client->identification_number }}</td>
                             <td>{{ $client->city }}</td>
+                            <td>
+                                @if (in_array($client->id, $activeClientIds))
+                                    <span class="badge bg-success">Activo</span>
+                                @else
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                @endif
+                            </td>
                             <td>
                                 <button wire:click="edit({{ $client->id }})" class="btn btn-sm btn-primary"
                                     data-bs-toggle="modal" data-bs-target="#clientModal">
@@ -190,6 +200,9 @@
             if (modal) {
                 modal.hide();
             }
+        });
+        Livewire.on('clientDeleteBlocked', function(message) {
+            Swal.fire('Acción bloqueada', message, 'error');
         });
     });
 

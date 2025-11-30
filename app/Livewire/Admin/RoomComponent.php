@@ -41,6 +41,7 @@ class RoomComponent extends Component
             ->where(function ($query) {
                 $query->where('rentalprice', 'like', '%' . $this->searchTerm . '%')
                     ->orWhere('number', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('room_number', 'like', '%' . $this->searchTerm . '%')
                     ->orWhereHas('property', function ($query) {
                         $query->where('name', 'like', '%' . $this->searchTerm . '%');
                     })
@@ -92,15 +93,23 @@ class RoomComponent extends Component
             ]
         );
 
+        $data = [
+            'rentalprice' => $this->rentalprice,
+            'number' => $this->number,
+            'people_count' => $this->people_count,
+            'type_id' => $this->type_id,
+            'property_id' => $this->property_id,
+        ];
+
+        // Generar room_number si es nueva habitación
+        if (!$this->isEditMode) {
+            $maxRoomCount = Room::count();
+            $data['room_number'] = 'R-' . str_pad($maxRoomCount + 1, 3, '0', STR_PAD_LEFT);
+        }
+
         Room::updateOrCreate(
             ['id' => $this->isEditMode ? $this->room_id : null],
-            [
-                'rentalprice' => $this->rentalprice,
-                'number' => $this->number,
-                'people_count' => $this->people_count,
-                'type_id' => $this->type_id,
-                'property_id' => $this->property_id,
-            ]
+            $data
         );
 
         $message = $this->isEditMode ? 'Habitación actualizada exitosamente.' : 'Habitación creada con éxito.';
@@ -126,12 +135,23 @@ class RoomComponent extends Component
     public function delete($id)
     {
         $room = Room::find($id);
-        if ($room) {
-            $room->delete();
-            $this->dispatch('roomDeleted');
-        } else {
+        if (!$room) {
             session(null)->flash('message', 'Habitación no encontrada.');
+            return;
         }
+
+        // Bloquear eliminación si existe alquiler activo asociado
+        $ocupada = Rent::where('room_id', $id)->where('status', 1)->exists();
+        if ($ocupada) {
+            $msg = 'La habitación está ocupada y no puede eliminarse. Libérela primero.';
+            session(null)->flash('message', $msg);
+            $this->dispatch('roomDeleteBlocked', message: $msg);
+            return;
+        }
+
+        $room->delete();
+        $this->dispatch('roomDeleted');
+        session(null)->flash('message', 'Habitación eliminada correctamente.');
     }
 
     //LIBERAR

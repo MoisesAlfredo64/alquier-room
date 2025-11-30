@@ -39,7 +39,11 @@ class RentComponent extends Component
             'identification_type' => 'nullable|string'
         ]);
 
+        // Generar client_number automático
+        $maxClientNumber = Client::max('client_number') ?? 0;
+
         $client = Client::create([
+            'client_number' => $maxClientNumber + 1,
             'full_name' => $this->full_name,
             'date_of_birth' => !empty($this->date_of_birth) ? $this->date_of_birth : null,
             'gender' => !empty($this->gender) ? $this->gender : null,
@@ -104,7 +108,12 @@ class RentComponent extends Component
             'note' => 'nullable|string'
         ]);
 
+        // Generar rent_number automático (ALQ-0001, ALQ-0002, etc.)
+        $maxRentCount = Rent::count();
+        $rentNumber = 'ALQ-' . str_pad($maxRentCount + 1, 4, '0', STR_PAD_LEFT);
+
         Rent::create([
+            'rent_number' => $rentNumber,
             'note' => $this->note,
             'client_id' => $this->client_id,
             'room_id' => $this->room->id
