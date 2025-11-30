@@ -40,6 +40,7 @@ class RoomComponent extends Component
         $rooms = Room::with(['property', 'type'])
             ->where(function ($query) {
                 $query->where('rentalprice', 'like', '%' . $this->searchTerm . '%')
+                    ->orWhere('number', 'like', '%' . $this->searchTerm . '%')
                     ->orWhereHas('property', function ($query) {
                         $query->where('name', 'like', '%' . $this->searchTerm . '%');
                     })
