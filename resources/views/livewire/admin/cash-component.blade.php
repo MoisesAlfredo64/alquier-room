@@ -97,7 +97,7 @@
                 <th>Fecha Apertura</th>
                 <th>Fecha Cierre</th>
                 <th>Ingresos</th>
-                <th>Gasto</th>
+                <th>Egreso</th>
                 <th>Estado</th>
                 <th>Acción</th>
             </tr>

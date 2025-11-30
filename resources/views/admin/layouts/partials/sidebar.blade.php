@@ -41,7 +41,7 @@
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item"> <a class="nav-link" href="{{ route('cashboxs.index') }}">Caja</a>
                     </li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('expenses.index') }}">Gastos</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="{{ route('expenses.index') }}">Egresos</a></li>
                 </ul>
             </div>
         </li>

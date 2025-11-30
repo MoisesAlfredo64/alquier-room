@@ -124,7 +124,7 @@ class ExpenseComponent extends Component
                     $expenseData
                 );
 
-                $message = $this->isEditMode ? 'Gasto actualizado exitosamente.' : 'Gasto creado con éxito.';
+                $message = $this->isEditMode ? 'Egreso actualizado exitosamente.' : 'Egreso creado con éxito.';
                 session(null)->flash('message', $message);
 
                 $this->resetInputFields();
@@ -133,7 +133,7 @@ class ExpenseComponent extends Component
                 session(null)->flash('warning', 'Saldo insuficiente. Disponible: ' . number_format($saldo, 2));
             }
         } else {
-            session(null)->flash('warning', 'La caja está cerrada. Debe abrir caja para registrar gastos.');
+            session(null)->flash('warning', 'La caja está cerrada. Debe abrir caja para registrar egresos.');
         }
     }
 
@@ -160,7 +160,7 @@ class ExpenseComponent extends Component
             $expense->delete();
             $this->dispatch('expenseDeleted');
         } else {
-            session(null)->flash('message', 'Gasto no encontrado.');
+            session(null)->flash('message', 'Egreso no encontrado.');
         }
     }
 

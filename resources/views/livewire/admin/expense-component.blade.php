@@ -47,7 +47,7 @@
             <tbody>
                 @if ($expenses->isEmpty())
                     <tr>
-                        <td colspan="4" class="text-center">No se encontraron gastos.</td>
+                        <td colspan="4" class="text-center">No se encontraron egresos.</td>
                     </tr>
                 @else
                     @foreach ($expenses as $expense)
@@ -88,7 +88,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="expenseModalLabel">
-                        {{ $isEditMode ? 'Editar gasto' : 'Crear gasto' }}</h5>
+                        {{ $isEditMode ? 'Editar egreso' : 'Crear egreso' }}</h5>
                     <button expense="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                 </div>
@@ -160,7 +160,7 @@
                 @this.call('delete', id);
                 Swal.fire(
                     'Eliminado!',
-                    'Gasto ha sido eliminada.',
+                    'Egreso eliminado.',
                     'success'
                 );
             }
