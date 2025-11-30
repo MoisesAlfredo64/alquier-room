@@ -57,7 +57,9 @@
                             <td>{{ $expense->description }}</td>
                             <td>
                                 @if ($expense->photo)
-                                    <img src="{{ asset('storage/' . $expense->photo) }}" width="100" alt="Foto">
+                                    <a href="{{ asset('storage/' . $expense->photo) }}" target="_blank">
+                                        <img src="{{ asset('storage/' . $expense->photo) }}" width="100" alt="Foto" style="cursor: pointer;">
+                                    </a>
                                 @else
                                     <span>No disponible</span>
                                 @endif
