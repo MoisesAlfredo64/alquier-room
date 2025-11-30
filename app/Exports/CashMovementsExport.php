@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\CashBox;
 use App\Models\Expense;
+use App\Models\Income;
 use App\Models\Payment;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -28,7 +29,7 @@ class CashMovementsExport implements FromCollection, WithHeadings, WithMapping, 
         $movimientos = collect();
 
         if ($this->general) {
-            // Todos los pagos y gastos
+            // Todos los pagos, ingresos manuales y gastos
             $ingresos = Payment::with('rent.client', 'rent.room')
                 ->get()
                 ->map(function($payment) {
@@ -41,6 +42,16 @@ class CashMovementsExport implements FromCollection, WithHeadings, WithMapping, 
                         'fecha' => $payment->created_at
                     ];
                 });
+            $ingresosExtras = Income::with('cashbox')
+                ->get()
+                ->map(function($income) {
+                    return [
+                        'tipo' => 'Ingreso',
+                        'descripcion' => 'Ingreso extra - ' . $income->description,
+                        'monto' => $income->amount,
+                        'fecha' => $income->created_at
+                    ];
+                });
             $egresos = Expense::get()
                 ->map(function($expense) {
                     return [
@@ -50,6 +61,7 @@ class CashMovementsExport implements FromCollection, WithHeadings, WithMapping, 
                         'fecha' => $expense->created_at
                     ];
                 });
+            $ingresos = $ingresos->concat($ingresosExtras);
         } else {
             // Solo movimientos de una caja
             $ingresos = Payment::with('rent.client', 'rent.room')
@@ -65,6 +77,16 @@ class CashMovementsExport implements FromCollection, WithHeadings, WithMapping, 
                         'fecha' => $payment->created_at
                     ];
                 });
+            $ingresosExtras = Income::where('cashbox_id', $this->cashboxId)
+                ->get()
+                ->map(function($income) {
+                    return [
+                        'tipo' => 'Ingreso',
+                        'descripcion' => 'Ingreso extra - ' . $income->description,
+                        'monto' => $income->amount,
+                        'fecha' => $income->created_at
+                    ];
+                });
             $egresos = Expense::where('cashbox_id', $this->cashboxId)
                 ->get()
                 ->map(function($expense) {
@@ -75,6 +97,7 @@ class CashMovementsExport implements FromCollection, WithHeadings, WithMapping, 
                         'fecha' => $expense->created_at
                     ];
                 });
+            $ingresos = $ingresos->concat($ingresosExtras);
         }
 
         // Combinar y ordenar

@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\CashComponent;
 use App\Livewire\Admin\ClientComponent;
 use App\Livewire\Admin\ExpenseComponent;
+use App\Livewire\Admin\IncomeComponent;
 use App\Livewire\Admin\PropertyComponent;
 use App\Livewire\Admin\RentalComponent;
 use App\Livewire\Admin\RoomComponent;
@@ -20,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/properties', PropertyComponent::class)->name('properties.index');
     Route::get('/types', TypeComponent::class)->name('types.index');
     Route::get('/expenses', ExpenseComponent::class)->name('expenses.index');
+    Route::get('/incomes', IncomeComponent::class)->name('incomes.index');
     Route::get('/cashboxs', function () { return view('admin.cashboxs'); })->name('cashboxs.index');
     Route::get('/rooms', RoomComponent::class)->name('rooms.index');
     Route::get('/clients', ClientComponent::class)->name('clients.index');

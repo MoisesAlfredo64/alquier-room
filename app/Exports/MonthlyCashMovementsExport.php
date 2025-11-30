@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Expense;
 use App\Models\Payment;
+use App\Models\Income;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -39,6 +40,17 @@ class MonthlyCashMovementsExport implements FromCollection, WithHeadings, WithMa
                 ];
             });
 
+        $ingresosExtras = Income::whereBetween('created_at', [$start, $end])
+            ->get()
+            ->map(function ($income) {
+                return [
+                    'tipo' => 'Ingreso',
+                    'descripcion' => 'Ingreso extra - ' . $income->description,
+                    'monto' => $income->amount,
+                    'fecha' => $income->created_at,
+                ];
+            });
+
         $egresos = Expense::whereBetween('created_at', [$start, $end])
             ->get()
             ->map(function ($expense) {
@@ -50,7 +62,7 @@ class MonthlyCashMovementsExport implements FromCollection, WithHeadings, WithMa
                 ];
             });
 
-        return $ingresos->concat($egresos)->sortBy('fecha')->values();
+        return $ingresos->concat($ingresosExtras)->concat($egresos)->sortBy('fecha')->values();
     }
 
     public function headings(): array

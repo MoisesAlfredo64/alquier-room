@@ -112,7 +112,7 @@
                     <tr>
                         <td>{{ $cashbox->created_at }}</td>
                         <td>{{ $cashbox->closing_date }}</td>
-                        <td>{{ number_format($cashbox->payments_sum_amount ?? 0, 2) }}</td>
+                        <td>{{ number_format(($cashbox->payments_sum_amount ?? 0) + ($cashbox->incomes_sum_amount ?? 0), 2) }}</td>
                         <td>{{ number_format($cashbox->expenses_sum_amount ?? 0, 2) }}</td>
                         <td>
                             @if ($cashbox->status == 1)

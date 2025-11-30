@@ -28,6 +28,12 @@ class CashBox extends Model
         return $this->hasMany(Expense::class, 'cashbox_id');
     }
 
+    // Relación con ingresos extra
+    public function incomes()
+    {
+        return $this->hasMany(Income::class, 'cashbox_id');
+    }
+
     // Relación con usuario
     public function user()
     {

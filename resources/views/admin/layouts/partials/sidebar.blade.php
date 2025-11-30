@@ -42,6 +42,7 @@
                     <li class="nav-item"> <a class="nav-link" href="{{ route('cashboxs.index') }}">Caja</a>
                     </li>
                     <li class="nav-item"> <a class="nav-link" href="{{ route('expenses.index') }}">Egresos</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="{{ route('incomes.index') }}">Ingresos</a></li>
                 </ul>
             </div>
         </li>

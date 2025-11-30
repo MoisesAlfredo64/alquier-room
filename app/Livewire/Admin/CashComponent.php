@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\CashBox;
 use App\Models\Expense;
 use App\Models\Payment;
+use App\Models\Income;
 use App\Exports\CashMovementsExport;
 use App\Exports\MonthlyCashMovementsExport;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,7 @@ class CashComponent extends Component
         $totalEgresos = 0;
 
         if ($this->cajaExiste) {
-            // Obtener pagos (ingresos)
+            // Obtener pagos (ingresos por alquiler)
             $ingresos = Payment::with('rent.client', 'rent.room')
                 ->where('cashbox_id', $this->cajaExiste->id)
                 ->get()
@@ -56,6 +57,18 @@ class CashComponent extends Component
                             ' (Habitación ' . ($payment->rent->room->number ?? 'N/A') . ')',
                         'monto' => $payment->amount,
                         'fecha' => $payment->created_at
+                    ];
+                });
+
+            // Obtener ingresos extra (manuales)
+            $ingresosExtras = Income::where('cashbox_id', $this->cajaExiste->id)
+                ->get()
+                ->map(function($income) {
+                    return [
+                        'tipo' => 'Ingreso',
+                        'descripcion' => 'Ingreso extra - ' . $income->description,
+                        'monto' => $income->amount,
+                        'fecha' => $income->created_at
                     ];
                 });
 
@@ -72,13 +85,14 @@ class CashComponent extends Component
                 });
 
             // Combinar y ordenar
-            $movimientos = $ingresos->concat($egresos)->sortByDesc('fecha');
-            $totalIngresos = $ingresos->sum('monto');
+            $movimientos = $ingresos->concat($ingresosExtras)->concat($egresos)->sortByDesc('fecha');
+            $totalIngresos = $ingresos->sum('monto') + $ingresosExtras->sum('monto');
             $totalEgresos = $egresos->sum('monto');
         }
 
         $query = CashBox::withSum('payments', 'amount')
             ->withSum('expenses', 'amount')
+            ->withSum('incomes', 'amount')
             ->orderBy('id', 'desc');
 
         if (!empty($this->searchTerm)) {
@@ -99,9 +113,9 @@ class CashComponent extends Component
             if (!isset($totalesPorMes[$mes])) {
                 $totalesPorMes[$mes] = ['ingreso' => 0, 'egreso' => 0];
             }
-            $totalesPorMes[$mes]['ingreso'] += $caja->payments_sum_amount ?? 0;
+            $totalesPorMes[$mes]['ingreso'] += ($caja->payments_sum_amount ?? 0) + ($caja->incomes_sum_amount ?? 0);
             $totalesPorMes[$mes]['egreso'] += $caja->expenses_sum_amount ?? 0;
-            $ingresoGeneral += $caja->payments_sum_amount ?? 0;
+            $ingresoGeneral += ($caja->payments_sum_amount ?? 0) + ($caja->incomes_sum_amount ?? 0);
             $egresoGeneral += $caja->expenses_sum_amount ?? 0;
         }
 
