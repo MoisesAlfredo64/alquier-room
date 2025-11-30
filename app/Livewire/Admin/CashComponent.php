@@ -87,15 +87,38 @@ class CashComponent extends Component
             });
         }
 
-        $cashboxs = $query->paginate(10);
+        $cashboxs = $query->get();
+
+        // Agrupar por mes y calcular totales
+        $totalesPorMes = [];
+        $ingresoGeneral = 0;
+        $egresoGeneral = 0;
+        foreach ($cashboxs as $caja) {
+            $mes = \Carbon\Carbon::parse($caja->created_at)->format('Y-m');
+            if (!isset($totalesPorMes[$mes])) {
+                $totalesPorMes[$mes] = ['ingreso' => 0, 'egreso' => 0];
+            }
+            $totalesPorMes[$mes]['ingreso'] += $caja->payments_sum_amount ?? 0;
+            $totalesPorMes[$mes]['egreso'] += $caja->expenses_sum_amount ?? 0;
+            $ingresoGeneral += $caja->payments_sum_amount ?? 0;
+            $egresoGeneral += $caja->expenses_sum_amount ?? 0;
+        }
+
+        // Paginación manual para la tabla
+        $page = request()->get('page', 1);
+        $perPage = 10;
+        $paginated = $cashboxs->slice(($page - 1) * $perPage, $perPage)->values();
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator($paginated, $cashboxs->count(), $perPage, $page);
 
         return view('livewire.admin.cash-component', [
-            'cashboxs' => $cashboxs,
+            'cashboxs' => $paginator,
             'movimientos' => $movimientos,
             'totalIngresos' => $totalIngresos,
-            'totalEgresos' => $totalEgresos
-        ])
-            ->extends('admin.layouts.app');
+            'totalEgresos' => $totalEgresos,
+            'totalesPorMes' => $totalesPorMes,
+            'ingresoGeneral' => $ingresoGeneral,
+            'egresoGeneral' => $egresoGeneral
+        ]);
     }
 
     public function resetInputFields()

@@ -146,7 +146,35 @@
 
     {{ $cashboxs->links() }}
 
-    <!-- Modal de monto inicial eliminado por requerimiento -->
+    <!-- Totales por mes -->
+    <div class="mt-4">
+        <h5>Totales por mes</h5>
+        <table class="table table-bordered w-auto">
+            <thead>
+                <tr>
+                    <th>Mes</th>
+                    <th>Ingresos</th>
+                    <th>Egresos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($totalesPorMes as $mes => $totales)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $mes)->format('F Y') }}</td>
+                        <td>{{ number_format($totales['ingreso'], 2) }}</td>
+                        <td>{{ number_format($totales['egreso'], 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr class="table-dark">
+                    <th>Total General</th>
+                    <th>{{ number_format($ingresoGeneral, 2) }}</th>
+                    <th>{{ number_format($egresoGeneral, 2) }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
 
 <script>
