@@ -24,8 +24,8 @@
                 <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     <div class="nav-profile-img">
-                        @if (Auth::user()->avatar)
-                            <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="Avatar" width="100">
+                        @if (Auth::user()->profile_photo)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="profile" width="100">
                         @else
                             <img src="{{ asset('assets/admin/images/faces/face1.jpg') }}" alt="profile" width="100">
                         @endif

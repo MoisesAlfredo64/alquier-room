@@ -13,9 +13,25 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-4">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-4" enctype="multipart/form-data">
         @csrf
         @method('patch')
+
+        <div class="mb-3">
+            <label for="profile_photo" class="form-label">{{ __('Profile Photo') }}</label>
+            @if ($user->profile_photo)
+                <div class="mb-2">
+                    <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="Profile Photo" class="rounded-circle" width="100" height="100" style="object-fit: cover;">
+                </div>
+            @endif
+            <input id="profile_photo" name="profile_photo" type="file" class="form-control" accept=".jpeg,.png,.jpg" />
+            @if ($errors->has('profile_photo'))
+                <div class="form-text text-danger">
+                    {{ $errors->first('profile_photo') }}
+                </div>
+            @endif
+            <small class="form-text text-muted">Formatos permitidos: JPG, PNG, JPEG. Tamaño máximo: 2MB</small>
+        </div>
 
         <div class="mb-3">
             <label for="name" class="form-label">{{ __('Name') }}</label>

@@ -3,8 +3,8 @@
         <li class="nav-item nav-profile">
             <a href="{{route('profile.edit')}}" class="nav-link text-white">
                 <div class="nav-profile-image">
-                    @if (Auth::user()->avatar)
-                        <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="Avatar" width="100">
+                    @if (Auth::user()->profile_photo)
+                        <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="profile" width="100">
                     @else
                         <img src="{{ asset('assets/admin/images/faces/face1.jpg') }}" alt="profile" width="100">
                     @endif
