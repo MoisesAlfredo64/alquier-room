@@ -6,6 +6,7 @@ use App\Models\CashBox;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Exports\CashMovementsExport;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,7 +23,6 @@ class CashComponent extends Component
     protected $listeners = ['delete'];
 
     protected $rules = [
-        'initial_amount' => 'required'
     ];
 
     public function render()
@@ -68,10 +68,18 @@ class CashComponent extends Component
             $totalEgresos = $egresos->sum('monto');
         }
 
-        $cashboxs = CashBox::where('initial_amount', 'like', '%' . $this->searchTerm . '%')
-            ->orWhere('status', 'like', '%' . $this->searchTerm . '%')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+        $query = CashBox::withSum('payments', 'amount')
+            ->withSum('expenses', 'amount')
+            ->orderBy('id', 'desc');
+
+        if (!empty($this->searchTerm)) {
+            $query->where(function ($q) {
+                $q->where('status', 'like', '%' . $this->searchTerm . '%')
+                  ->orWhereDate('created_at', $this->searchTerm);
+            });
+        }
+
+        $cashboxs = $query->paginate(10);
 
         return view('livewire.admin.cash-component', [
             'cashboxs' => $cashboxs,
@@ -89,33 +97,24 @@ class CashComponent extends Component
         $this->isEditMode = false;
     }
 
-    public function storeOrUpdate()
+    public function abrirCaja()
     {
-        $this->validate();
+        $existe = CashBox::where('status', 1)->first();
+        if ($existe) {
+            session()->flash('error', 'Ya existe una caja abierta.');
+            return;
+        }
 
-        CashBox::updateOrCreate(
-            ['id' => $this->isEditMode ? $this->cashbox_id : null],
-            [
-                'initial_amount' => $this->initial_amount,
-                'user_id' => auth()->user()->id
-            ]
-        );
+        CashBox::create([
+            'initial_amount' => 0,
+            'status' => 1,
+            'user_id' => Auth::id(),
+        ]);
 
-        $message = $this->isEditMode ? 'Monto inicial actualizada exitosamente.' : 'Monto inicial creada con éxito.';
-        session(null)->flash('message', $message);
-
-        $this->resetInputFields();
-        $this->dispatch('cashStoreOrUpdate');
+        session()->flash('message', 'Caja abierta correctamente.');
     }
 
-    public function edit($id)
-    {
-        $this->resetValidation();
-        $type = CashBox::findOrFail($id);
-        $this->cashbox_id = $id;
-        $this->initial_amount = $type->initial_amount;
-        $this->isEditMode = true;
-    }
+    // Edición del monto inicial deshabilitada por requerimiento
 
     public function delete($id)
     {
@@ -123,7 +122,7 @@ class CashComponent extends Component
         if ($type) {
             $type->delete();
         } else {
-            session(null)->flash('message', 'Monto inicial no encontrada.');
+            session(null)->flash('message', 'Caja no encontrada.');
         }
     }
 

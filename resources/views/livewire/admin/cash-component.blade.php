@@ -5,13 +5,11 @@
         </div>
         @if ($cajaExiste)
             <div class="col-md-6 text-right">
-                <button class="btn btn-primary"
-                onclick="confirmCierre()">Cerrar Caja</button>
+                <button class="btn btn-primary" onclick="confirmCierre()">Cerrar Caja</button>
             </div>
         @else
             <div class="col-md-6 text-right">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#typeModal"
-                    wire:click="resetInputFields">Abrir Caja</button>
+                <button class="btn btn-primary" wire:click="abrirCaja">Abrir Caja</button>
             </div>
         @endif
 
@@ -102,6 +100,7 @@
                 <th>Monto Inicial</th>
                 <th>Fecha Apertura</th>
                 <th>Fecha Cierre</th>
+                <th>Ingresos</th>
                 <th>Gasto</th>
                 <th>Estado</th>
                 <th>Acción</th>
@@ -110,7 +109,7 @@
         <tbody>
             @if ($cashboxs->isEmpty())
                 <tr>
-                    <td colspan="4" class="text-center">No se encontraron cajas.</td>
+                    <td colspan="7" class="text-center">No se encontraron cajas.</td>
                 </tr>
             @else
                 @foreach ($cashboxs as $cashbox)
@@ -118,7 +117,8 @@
                         <td>{{ $cashbox->initial_amount }}</td>
                         <td>{{ $cashbox->created_at }}</td>
                         <td>{{ $cashbox->closing_date }}</td>
-                        <td>{{ $cashbox->spent }}</td>
+                        <td>{{ number_format($cashbox->payments_sum_amount ?? 0, 2) }}</td>
+                        <td>{{ number_format($cashbox->expenses_sum_amount ?? 0, 2) }}</td>
                         <td>
                             @if ($cashbox->status == 1)
                                 <span class="badge bg-warning text-dark">Abierto</span>
@@ -127,10 +127,6 @@
                             @endif
                         </td>
                         <td>
-                            <button wire:click="edit({{ $cashbox->id }})" class="btn btn-sm btn-primary"
-                                data-bs-toggle="modal" data-bs-target="#typeModal">
-                                <i class="fas fa-edit"></i>
-                            </button>
                             <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $cashbox->id }})">
                                 <i class="fas fa-times-circle"></i>
                             </button>
@@ -144,37 +140,7 @@
 
     {{ $cashboxs->links() }}
 
-    <!-- Property Modal -->
-    <div wire:ignore.self class="modal fade" id="typeModal" tabindex="-1" aria-labelledby="typeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="typeModalLabel">
-                        {{ $isEditMode ? 'Editar Caja' : 'Crear Caja' }}</h5>
-                    <button cashbox="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label for="initial_amount">Monto inicial</label>
-                            <input cashbox="text" class="form-control" placeholder="Monto inicial" id="initial_amount"
-                                wire:model="initial_amount">
-                            @error('initial_amount')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button cashbox="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                    <button cashbox="button" wire:click.prevent="storeOrUpdate()"
-                        class="btn btn-sm btn-primary">{{ $isEditMode ? 'Actualizar' : 'Guardar' }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Modal de monto inicial eliminado por requerimiento -->
 </div>
 
 <script>
@@ -201,7 +167,7 @@
                 @this.call('delete', id);
                 Swal.fire(
                     'Eliminado!',
-                    'Monto inicial ha sido eliminada.',
+                    'Caja eliminada.',
                     'success'
                 );
             }
@@ -219,7 +185,7 @@
             confirmButtonText: '¡Sí, cerrar!'
         }).then((result) => {
             if (result.isConfirmed) {
-                @this.call('cerrarCaja', id);
+                @this.call('cerrarCaja');
                 Swal.fire(
                     'Aviso!',
                     'Caja Cerrada',
