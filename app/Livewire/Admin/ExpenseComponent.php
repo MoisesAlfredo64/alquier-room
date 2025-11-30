@@ -72,22 +72,22 @@ class ExpenseComponent extends Component
     {
         $this->validate();
 
-        //COMPORBAR CAJA
+        //COMPROBAR CAJA
         $caja = CashBox::where('status', 1)->first();
 
         if ($caja) {
-            //GASTOS
-            $gasto = Expense::where('cashbox_id', $caja->id)->sum('amount');
-            $pagos = Payment::where('cashbox_id', $caja->id)->sum('amount');
-            //COMPORBAR SALDO
-            $saldo = ($caja->initial_amount + $pagos) - $gasto;
+            // Usar saldo total histórico del sistema
+            $pagos = Payment::sum('amount');
+            $gasto = Expense::sum('amount');
+            $saldo = $pagos - $gasto;
+            
             if ($this->isEditMode) {
-                //GASTO ANTERIOR
+                // Reponer el gasto anterior para calcular saldo disponible
                 $anterior = Expense::findOrFail($this->expense_id);
-                $saldo = ($caja->initial_amount + $pagos + $anterior->amount) - $gasto;
+                $saldo = ($pagos + $anterior->amount) - $gasto;
             }
 
-            if ($saldo >=  $this->amount) {
+            if ($saldo >= $this->amount) {
                 $expenseData = [
                     'amount' => $this->amount,
                     'description' => $this->description,
@@ -130,10 +130,10 @@ class ExpenseComponent extends Component
                 $this->resetInputFields();
                 $this->dispatch('expenseStoreOrUpdate');
             } else {
-                session(null)->flash('warning', 'Saldo no disponible');
+                session(null)->flash('warning', 'Saldo insuficiente. Disponible: ' . number_format($saldo, 2));
             }
         } else {
-            session(null)->flash('warning', 'La caja esta cerrada');
+            session(null)->flash('warning', 'La caja está cerrada. Debe abrir caja para registrar gastos.');
         }
     }
 
