@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/properties', PropertyComponent::class)->name('properties.index');
     Route::get('/types', TypeComponent::class)->name('types.index');
     Route::get('/expenses', ExpenseComponent::class)->name('expenses.index');
-    Route::get('/cashboxs', CashComponent::class)->name('cashboxs.index');
+    Route::get('/cashboxs', function () { return view('admin.cashboxs'); })->name('cashboxs.index');
     Route::get('/rooms', RoomComponent::class)->name('rooms.index');
     Route::get('/clients', ClientComponent::class)->name('clients.index');
     Route::get('/rentals', RentalComponent::class)->name('rentals.index');

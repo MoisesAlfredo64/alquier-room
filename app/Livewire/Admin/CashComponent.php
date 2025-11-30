@@ -15,6 +15,14 @@ class CashComponent extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
+
+    public function exportAllMovements()
+    {
+        return Excel::download(
+            new CashMovementsExport(null, true),
+            'movimientos_caja_general_' . date('Y-m-d') . '.xlsx'
+        );
+    }
     public $initial_amount, $description, $cashbox_id;
     public $isEditMode = false;
     public $searchTerm;
@@ -135,16 +143,16 @@ class CashComponent extends Component
         session(null)->flash('message', 'Caja Cerrado.');
     }
 
-    public function exportMovements()
+    public function exportMovements($cashboxId = null)
     {
-        if (!$this->cajaExiste) {
-            session()->flash('error', 'No hay caja abierta para exportar.');
+        $id = $cashboxId ?? ($this->cajaExiste ? $this->cajaExiste->id : null);
+        if (!$id) {
+            session()->flash('error', 'No hay caja seleccionada para exportar.');
             return;
         }
-
         return Excel::download(
-            new CashMovementsExport($this->cajaExiste->id), 
-            'movimientos_caja_' . date('Y-m-d') . '.xlsx'
+            new CashMovementsExport($id), 
+            'movimientos_caja_' . $id . '_' . date('Y-m-d') . '.xlsx'
         );
     }
 }

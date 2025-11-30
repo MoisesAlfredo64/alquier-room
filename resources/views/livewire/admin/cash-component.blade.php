@@ -92,12 +92,16 @@
         </div>
     @endif
 
-    <h5 class="mb-3">Historial de Cajas</h5>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Historial de Cajas</h5>
+        <button class="btn btn-success btn-sm" wire:click="exportAllMovements">
+            <i class="fas fa-file-excel"></i> Exportar Excel General
+        </button>
+    </div>
 
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Monto Inicial</th>
                 <th>Fecha Apertura</th>
                 <th>Fecha Cierre</th>
                 <th>Ingresos</th>
@@ -114,7 +118,6 @@
             @else
                 @foreach ($cashboxs as $cashbox)
                     <tr>
-                        <td>{{ $cashbox->initial_amount }}</td>
                         <td>{{ $cashbox->created_at }}</td>
                         <td>{{ $cashbox->closing_date }}</td>
                         <td>{{ number_format($cashbox->payments_sum_amount ?? 0, 2) }}</td>
@@ -129,6 +132,9 @@
                         <td>
                             <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $cashbox->id }})">
                                 <i class="fas fa-times-circle"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success" wire:click="exportMovements({{ $cashbox->id }})">
+                                <i class="fas fa-file-excel"></i> Excel
                             </button>
                         </td>
                     </tr>
