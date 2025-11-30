@@ -37,17 +37,12 @@
             </div>
             <div class="card-body">
                 <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="alert alert-info">
-                            <strong>Monto Inicial:</strong> {{ number_format($cajaExiste->initial_amount, 2) }}
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="alert alert-success">
                             <strong>Total Ingresos:</strong> {{ number_format($totalIngresos, 2) }}
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="alert alert-danger">
                             <strong>Total Egresos:</strong> {{ number_format($totalEgresos, 2) }}
                         </div>

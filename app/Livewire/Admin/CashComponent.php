@@ -138,7 +138,6 @@ class CashComponent extends Component
         }
 
         CashBox::create([
-            'initial_amount' => 0,
             'status' => 1,
             'user_id' => Auth::id(),
         ]);

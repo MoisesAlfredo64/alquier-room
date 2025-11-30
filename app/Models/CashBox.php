@@ -10,7 +10,6 @@ class CashBox extends Model
     use HasFactory;
 
     protected $fillable = [
-        'initial_amount',
         'spent',
         'closing_date',
         'status',
