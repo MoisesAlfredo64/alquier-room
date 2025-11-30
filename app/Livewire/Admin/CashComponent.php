@@ -6,6 +6,7 @@ use App\Models\CashBox;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Exports\CashMovementsExport;
+use App\Exports\MonthlyCashMovementsExport;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -176,6 +177,19 @@ class CashComponent extends Component
         return Excel::download(
             new CashMovementsExport($id), 
             'movimientos_caja_' . $id . '_' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function exportMonth($month)
+    {
+        // Validar formato YYYY-MM
+        if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+            session()->flash('error', 'Formato de mes inválido.');
+            return;
+        }
+        return Excel::download(
+            new MonthlyCashMovementsExport($month),
+            'movimientos_mes_' . $month . '.xlsx'
         );
     }
 }

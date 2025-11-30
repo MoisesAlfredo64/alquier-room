@@ -94,9 +94,6 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Historial de Cajas</h5>
-        <button class="btn btn-success btn-sm" wire:click="exportAllMovements">
-            <i class="fas fa-file-excel"></i> Exportar Excel General
-        </button>
     </div>
 
     <table class="table table-bordered">
@@ -155,6 +152,7 @@
                     <th>Mes</th>
                     <th>Ingresos</th>
                     <th>Egresos</th>
+                    <th>Registro</th>
                 </tr>
             </thead>
             <tbody>
@@ -163,6 +161,11 @@
                         <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $mes)->format('F Y') }}</td>
                         <td>{{ number_format($totales['ingreso'], 2) }}</td>
                         <td>{{ number_format($totales['egreso'], 2) }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" wire:click="exportMonth('{{ $mes }}')">
+                                <i class="fas fa-file-excel"></i> Descargar
+                            </button>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -171,6 +174,11 @@
                     <th>Total General</th>
                     <th>{{ number_format($ingresoGeneral, 2) }}</th>
                     <th>{{ number_format($egresoGeneral, 2) }}</th>
+                    <th>
+                        <button class="btn btn-sm btn-light" wire:click="exportAllMovements">
+                            <i class="fas fa-file-excel"></i> General
+                        </button>
+                    </th>
                 </tr>
             </tfoot>
         </table>
