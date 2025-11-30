@@ -108,7 +108,7 @@ class RentComponent extends Component
         $this->validate([
             'client_id' => 'required|numeric',
             'note' => 'nullable|string',
-            'contract_photo' => 'nullable|image|mimes:jpg,png,jpeg,pdf|max:5120'
+            'contract_photo' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120'
         ]);
 
         // Generar rent_number automático (ALQ-0001, ALQ-0002, etc.)

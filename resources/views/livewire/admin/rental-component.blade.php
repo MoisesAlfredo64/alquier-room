@@ -37,14 +37,22 @@
                                 <li><b class="text-dark">Fecha:</b> {{ $rent->created_at }}</li>
                             </ul>
 
-                            <a href="{{ route('rent.payment', Crypt::encrypt($rent->id)) }}"
-                                class="btn btn-sm btn-primary">
-                                <i class="fas fa-dollar-sign"></i>
-                            </a>
-                            <a href="#" onclick="confirmLiberar({{ $rent->id }})"
-                                class="btn btn-sm btn-info">
-                                Liberar
-                            </a>
+                            <div class="d-flex gap-2 flex-wrap">
+                                @if($rent->contract_photo)
+                                    <a href="{{ asset('storage/' . $rent->contract_photo) }}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="fas fa-file-contract"></i> Ver contrato
+                                    </a>
+                                @endif
+
+                                <a href="{{ route('rent.payment', Crypt::encrypt($rent->id)) }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-money-bill-wave"></i> Pago
+                                </a>
+                                <a href="#" onclick="confirmLiberar({{ $rent->id }})"
+                                    class="btn btn-sm btn-info">
+                                    <i class="fas fa-door-open"></i> Liberar
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

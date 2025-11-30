@@ -8,8 +8,8 @@
     </div>
 
     <div class="form-group">
-        <label for="contract_photo">Agregar imagen de contrato</label>
-        <input type="file" id="contract_photo" class="form-control" wire:model="contract_photo" accept="image/*,.pdf">
+        <label for="contract_photo">Agregar contrato</label>
+        <input type="file" id="contract_photo" class="form-control" wire:model="contract_photo" accept=".pdf,.png,.jpg,.jpeg">
         @error('contract_photo')
             <span class="text-danger">{{ $message }}</span>
         @enderror
