@@ -7,15 +7,17 @@ use App\Models\Rent;
 use App\Models\Room;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class RentComponent extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
     protected $paginationTheme = 'bootstrap';
 
     public $room;
     public $searchTerm;
-    public $full_name, $date_of_birth, $gender, $phone, $email, $address, $city, $state, $postal_code, $country, $identification_number, $identification_type, $note, $client_id;
+    public $full_name, $date_of_birth, $gender, $phone, $email, $address, $city, $state, $postal_code, $country, $identification_number, $identification_type, $note, $contract_photo, $client_id;
 
     public function mount(Room $room)
     {
@@ -105,19 +107,28 @@ class RentComponent extends Component
     {
         $this->validate([
             'client_id' => 'required|numeric',
-            'note' => 'nullable|string'
+            'note' => 'nullable|string',
+            'contract_photo' => 'nullable|image|mimes:jpg,png,jpeg,pdf|max:5120'
         ]);
 
         // Generar rent_number automático (ALQ-0001, ALQ-0002, etc.)
         $maxRentCount = Rent::count();
         $rentNumber = 'ALQ-' . str_pad($maxRentCount + 1, 4, '0', STR_PAD_LEFT);
 
-        Rent::create([
+        $data = [
             'rent_number' => $rentNumber,
             'note' => $this->note,
             'client_id' => $this->client_id,
             'room_id' => $this->room->id
-        ]);
+        ];
+
+        // Guardar foto del contrato si existe
+        if ($this->contract_photo) {
+            $path = $this->contract_photo->store('contracts', 'public');
+            $data['contract_photo'] = $path;
+        }
+
+        Rent::create($data);
 
         // Redirige a una ruta específica después de la creación
         return redirect()->route('rooms.index')->with('message', '¡Alquiler creado con éxito!');

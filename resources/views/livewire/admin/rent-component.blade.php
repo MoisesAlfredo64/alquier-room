@@ -7,6 +7,23 @@
         @enderror
     </div>
 
+    <div class="form-group">
+        <label for="contract_photo">Agregar imagen de contrato</label>
+        <input type="file" id="contract_photo" class="form-control" wire:model="contract_photo" accept="image/*,.pdf">
+        @error('contract_photo')
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+        @if ($contract_photo)
+            <div class="mt-2">
+                @if(in_array($contract_photo->getClientOriginalExtension(), ['jpg', 'jpeg', 'png']))
+                    <img src="{{ $contract_photo->temporaryUrl() }}" width="150" alt="Vista previa">
+                @else
+                    <span class="badge bg-info">Archivo PDF seleccionado</span>
+                @endif
+            </div>
+        @endif
+    </div>
+
     <div class="btn-group" role="group" aria-label="Button group">
         <button class="btn btn-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalClient"><i
                 class="fas fa-plus-circle"></i> Nuevo Cliente</button>
