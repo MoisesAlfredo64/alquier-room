@@ -30,7 +30,7 @@
                         </div>
                         <div class="card-body">
                             <h5 class="card-title fs-4">
-                                {{ $room->rentalprice }} <span class="text-secondary">/ Mensual</span>
+                                {{ formatNumber($room->rentalprice) }} <span class="text-secondary">/ Mensual</span>
                             </h5>
                             <ul class="list-unstyled">
                                 <li><b class="text-dark">Tipo:</b> {{ $room->type->name }}</li>

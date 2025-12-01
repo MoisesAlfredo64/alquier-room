@@ -23,12 +23,11 @@
                         </thead>
                         @php
                             $rentalPrice = $rent->room->rentalprice;
-
-                            $total = number_format($rentalPrice, 2);
+                            $total = formatNumber($rentalPrice);
                         @endphp
                         <tbody class="table-group-divider">
                             <tr class="table-primary">
-                                <td>{{ number_format($rent->room->rentalprice, 2) }}</td>
+                                <td>{{ formatNumber($rent->room->rentalprice) }}</td>
                             </tr>
                             <tr>
                                 <td>TOTAL</td>

@@ -65,19 +65,19 @@
         <table class="table table-sm mb-0">
             <tr>
                 <td><strong>Alquiler habitación:</strong></td>
-                <td class="text-end">${{ number_format($baseTotal, 2) }}</td>
+                <td class="text-end">${{ formatNumber($baseTotal) }}</td>
             </tr>
             @if($parking > 0)
             <tr>
                 <td><strong>Estacionamiento Extra:</strong></td>
-                <td class="text-end">${{ number_format($parking, 2) }}</td>
+                <td class="text-end">${{ formatNumber($parking) }}</td>
             </tr>
             @endif
             <tr>
                 <td><strong>Consumo de Luz:</strong></td>
                 <td class="text-end">
                     @if($electricityCost > 0)
-                        ${{ number_format($electricityCost, 2) }}
+                        ${{ formatNumber($electricityCost) }}
                     @else
                         <span class="text-danger">Pendiente</span>
                     @endif
@@ -88,7 +88,7 @@
                 <td><strong>Garantía Pendiente:</strong></td>
                 <td class="text-end">
                     @if($warrantyPending > 0)
-                        <span class="text-danger">${{ number_format($warrantyPending, 2) }}</span>
+                        <span class="text-danger">${{ formatNumber($warrantyPending) }}</span>
                     @else
                         <span class="text-success">Pagada</span>
                     @endif
@@ -97,7 +97,7 @@
             @endif
             <tr class="table-primary">
                 <td><strong>Total Mensual:</strong></td>
-                <td class="text-end"><strong>${{ number_format($total, 2) }}</strong></td>
+                <td class="text-end"><strong>${{ formatNumber($total) }}</strong></td>
             </tr>
         </table>
     </div>
@@ -120,7 +120,7 @@
                     @foreach ($payments as $payment)
                         <tr>
                             <td>{{ $payment->payment_date ? Carbon::parse($payment->payment_date)->format('d/m/Y') : Carbon::parse($payment->created_at)->format('d/m/Y') }}</td>
-                            <td>{{ $payment['amount'] }}</td>
+                            <td>{{ formatNumber($payment['amount']) }}</td>
                             <td>
                                 <a target="_blank" href="{{ route('payment.pdf', Crypt::encrypt($payment->id)) }}"
                                     class="btn btn-danger btn-sm"><i class="fas fa-print"></i></a>
@@ -130,7 +130,7 @@
                     <tr>
                         <td><b>Total Abonos:</b></td>
                         <td colspan="2">
-                            <h4>{{ $totalAbonos }}</h4>
+                            <h4>{{ formatNumber($totalAbonos) }}</h4>
                         </td>
                     </tr>
                     <tr>
@@ -159,8 +159,8 @@
                 <div class="alert alert-info">
                     <h6>Última Lectura Registrada:</h6>
                     <p><strong>Fecha:</strong> {{ $lastReading->reading_date->format('d/m/Y') }}</p>
-                    <p><strong>Consumo:</strong> {{ number_format($lastReading->consumption, 2) }} KWH</p>
-                    <p><strong>Importe:</strong> ${{ number_format($lastReading->total_amount, 2) }}</p>
+                    <p><strong>Consumo:</strong> {{ formatNumber($lastReading->consumption, 2) }} KWH</p>
+                    <p><strong>Importe:</strong> ${{ formatNumber($lastReading->total_amount) }}</p>
                 </div>
             @else
                 <div class="alert alert-warning">
@@ -198,11 +198,11 @@
                             @foreach ($electricityReadings as $reading)
                                 <tr>
                                     <td>{{ $reading->reading_date->format('d/m/Y') }}</td>
-                                    <td>{{ number_format($reading->initial_reading, 2) }}</td>
-                                    <td>{{ number_format($reading->final_reading, 2) }}</td>
-                                    <td>{{ number_format($reading->consumption, 2) }}</td>
-                                    <td>${{ number_format($reading->kwh_price, 2) }}</td>
-                                    <td>${{ number_format($reading->total_amount, 2) }}</td>
+                                    <td>{{ formatNumber($reading->initial_reading, 2) }}</td>
+                                    <td>{{ formatNumber($reading->final_reading, 2) }}</td>
+                                    <td>{{ formatNumber($reading->consumption, 2) }}</td>
+                                    <td>${{ formatNumber($reading->kwh_price, 2) }}</td>
+                                    <td>${{ formatNumber($reading->total_amount) }}</td>
                                     <td>
                                         <button wire:click="editReading({{ $reading->id }})" class="btn btn-sm btn-primary" 
                                             data-bs-toggle="modal" data-bs-target="#electricityModal">
@@ -262,9 +262,9 @@
                         @endphp
                         @if($warrantyPending > 0)
                         <div class="mb-3">
-                            <label for="warranty_payment" class="form-label">Pago de Garantía (Pendiente: ${{ number_format($warrantyPending, 2) }})</label>
+                            <label for="warranty_payment" class="form-label">Pago de Garantía (Pendiente: ${{ formatNumber($warrantyPending) }})</label>
                             <input type="number" step="0.01" max="{{ $warrantyPending }}" class="form-control" id="warranty_payment" wire:model="warranty_payment" placeholder="0.00">
-                            <small class="text-muted">Máximo: ${{ number_format($warrantyPending, 2) }}</small>
+                            <small class="text-muted">Máximo: ${{ formatNumber($warrantyPending) }}</small>
                         </div>
                         @endif
                     </form>
@@ -322,8 +322,8 @@
                             @enderror
                         </div>
                         <div class="alert alert-info">
-                            <p><strong>Consumo:</strong> {{ number_format($consumption, 2) }} KWH</p>
-                            <p><strong>Importe Total:</strong> ${{ number_format($electricity_amount, 2) }}</p>
+                            <p><strong>Consumo:</strong> {{ formatNumber($consumption, 2) }} KWH</p>
+                            <p><strong>Importe Total:</strong> ${{ formatNumber($electricity_amount) }}</p>
                         </div>
                     </form>
                 </div>

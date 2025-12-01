@@ -39,12 +39,12 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="alert alert-success">
-                            <strong>Total Ingresos:</strong> {{ number_format($totalIngresos, 2) }}
+                            <strong>Total Ingresos:</strong> {{ formatNumber($totalIngresos) }}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="alert alert-danger">
-                            <strong>Total Egresos:</strong> {{ number_format($totalEgresos, 2) }}
+                            <strong>Total Egresos:</strong> {{ formatNumber($totalEgresos) }}</strong>
                         </div>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                                             @endif
                                         </td>
                                         <td>{{ $movimiento['descripcion'] }}</td>
-                                        <td>{{ number_format($movimiento['monto'], 2) }}</td>
+                                        <td>{{ formatNumber($movimiento['monto']) }}</td>
                                         <td>{{ \Carbon\Carbon::parse($movimiento['fecha'])->format('d/m/Y H:i') }}</td>
                                     </tr>
                                 @endforeach
@@ -112,8 +112,8 @@
                     <tr>
                         <td>{{ $cashbox->created_at }}</td>
                         <td>{{ $cashbox->closing_date }}</td>
-                        <td>{{ number_format(($cashbox->payments_sum_amount ?? 0) + ($cashbox->incomes_sum_amount ?? 0), 2) }}</td>
-                        <td>{{ number_format($cashbox->expenses_sum_amount ?? 0, 2) }}</td>
+                        <td>{{ formatNumber(($cashbox->payments_sum_amount ?? 0) + ($cashbox->incomes_sum_amount ?? 0)) }}</td>
+                        <td>{{ formatNumber($cashbox->expenses_sum_amount ?? 0) }}</td>
                         <td>
                             @if ($cashbox->status == 1)
                                 <span class="badge bg-warning text-dark">Abierto</span>
@@ -154,8 +154,8 @@
                 @foreach ($totalesPorMes as $mes => $totales)
                     <tr>
                         <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $mes)->format('F Y') }}</td>
-                        <td>{{ number_format($totales['ingreso'], 2) }}</td>
-                        <td>{{ number_format($totales['egreso'], 2) }}</td>
+                        <td>{{ formatNumber($totales['ingreso']) }}</td>
+                        <td>{{ formatNumber($totales['egreso']) }}</td>
                         <td>
                             <button class="btn btn-sm btn-success" wire:click="exportMonth('{{ $mes }}')">
                                 <i class="fas fa-file-excel"></i> Descargar
@@ -165,10 +165,10 @@
                 @endforeach
             </tbody>
             <tfoot>
-                <tr class="table-dark">
-                    <th>Total General</th>
-                    <th>{{ number_format($ingresoGeneral, 2) }}</th>
-                    <th>{{ number_format($egresoGeneral, 2) }}</th>
+                <tr class="table-info">
+                    <th>Total General:</th>
+                    <th>{{ formatNumber($ingresoGeneral) }}</th>
+                    <th>{{ formatNumber($egresoGeneral) }}</th>
                     <th>
                         <button class="btn btn-sm btn-light" wire:click="exportAllMovements">
                             <i class="fas fa-file-excel"></i> General

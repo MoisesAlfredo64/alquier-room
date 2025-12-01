@@ -52,7 +52,7 @@
                 @else
                     @foreach ($expenses as $expense)
                         <tr>
-                            <td>{{ $expense->amount }}</td>
+                            <td>{{ formatNumber($expense->amount) }}</td>
                             <td>{{ Carbon::parse($expense->created_at)->format('d/m/Y H:i') }}</td>
                             <td>{{ $expense->description }}</td>
                             <td>

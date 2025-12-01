@@ -72,13 +72,13 @@
             <h2>Alquiler</h2>
             <p><strong>Fecha de Inicio:</strong> {{ $payment->rent->created_at->format('d/m/Y') }}</p>
             <p><strong>Fecha de Fin:</strong> {{ $payment->rent->created_at->format('d/m/Y') }}</p>
-            <p><strong>Monto:</strong> {{ number_format($payment->rent->room->rentalprice, 2) }}</p>
+            <p><strong>Monto:</strong> {{ formatNumber($payment->rent->room->rentalprice) }}</p>
         </div>
 
         <div class="section">
             <h2>Pago</h2>
             <p><strong>Fecha de Pago:</strong> {{ $payment->created_at->format('d/m/Y') }}</p>
-            <p><strong>Monto:</strong> {{ number_format($payment->amount, 2) }}</p>
+            <p><strong>Monto:</strong> {{ formatNumber($payment->amount) }}</p>
         </div>
 
         <div class="line"></div>

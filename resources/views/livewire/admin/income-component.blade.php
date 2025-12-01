@@ -50,7 +50,7 @@
                 @else
                     @foreach ($incomes as $income)
                         <tr>
-                            <td>{{ number_format($income->amount, 2) }}</td>
+                            <td>{{ formatNumber($income->amount) }}</td>
                             <td>{{ \Carbon\Carbon::parse($income->created_at)->format('d/m/Y H:i') }}</td>
                             <td>{{ $income->description }}</td>
                             <td>

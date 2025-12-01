@@ -13,7 +13,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Habitación Nº {{ $pago['room_number'] }}</h5>
                                     <p class="mb-1"><strong>Inquilino:</strong> {{ $pago['client_name'] }}</p>
-                                    <p class="mb-1"><strong>Monto alquiler:</strong> ${{ number_format($pago['rental_price'], 2) }}</p>
+                                    <p class="mb-1"><strong>Monto alquiler:</strong> ${{ formatNumber($pago['rental_price']) }}</p>
                                     <p class="mb-1"><strong>Fecha límite de pago:</strong> {{ $pago['due_date'] }}</p>
                                 </div>
                             </div>
