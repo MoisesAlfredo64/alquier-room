@@ -14,6 +14,7 @@ class Rent extends Model
         'note',
         'uses_parking',
         'contract_photo',
+        'warranty_paid',
         'client_id',
         'room_id',
         'status'        

@@ -34,6 +34,11 @@
         // Obtener la última lectura de luz registrada (lastReading ya está cargada en el componente)
         $electricityCost = $lastReading ? $lastReading->total_amount : 0;
         
+        // Calcular garantía pendiente
+        $warrantyTotal = $rent->room->warranty ?? 0;
+        $warrantyPaid = $rent->warranty_paid ?? 0;
+        $warrantyPending = $warrantyTotal - $warrantyPaid;
+        
         $total = $baseTotal + $parking + $electricityCost;
 
         // Suma total de los abonos
@@ -78,6 +83,18 @@
                     @endif
                 </td>
             </tr>
+            @if($warrantyTotal > 0)
+            <tr class="table-warning">
+                <td><strong>Garantía Pendiente:</strong></td>
+                <td class="text-end">
+                    @if($warrantyPending > 0)
+                        <span class="text-danger">${{ number_format($warrantyPending, 2) }}</span>
+                    @else
+                        <span class="text-success">Pagada</span>
+                    @endif
+                </td>
+            </tr>
+            @endif
             <tr class="table-primary">
                 <td><strong>Total Mensual:</strong></td>
                 <td class="text-end"><strong>${{ number_format($total, 2) }}</strong></td>
@@ -169,12 +186,13 @@
                             <th>Consumo (KWH)</th>
                             <th>Precio KWH</th>
                             <th>Importe</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if ($electricityReadings->isEmpty())
                             <tr>
-                                <td colspan="6" class="text-center">No hay lecturas registradas.</td>
+                                <td colspan="7" class="text-center">No hay lecturas registradas.</td>
                             </tr>
                         @else
                             @foreach ($electricityReadings as $reading)
@@ -185,6 +203,15 @@
                                     <td>{{ number_format($reading->consumption, 2) }}</td>
                                     <td>${{ number_format($reading->kwh_price, 2) }}</td>
                                     <td>${{ number_format($reading->total_amount, 2) }}</td>
+                                    <td>
+                                        <button wire:click="editReading({{ $reading->id }})" class="btn btn-sm btn-primary" 
+                                            data-bs-toggle="modal" data-bs-target="#electricityModal">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="confirmDeleteReading({{ $reading->id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             @endforeach
                         @endif
@@ -228,6 +255,18 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+                        @php
+                            $warrantyTotal = $rent->room->warranty ?? 0;
+                            $warrantyPaid = $rent->warranty_paid ?? 0;
+                            $warrantyPending = $warrantyTotal - $warrantyPaid;
+                        @endphp
+                        @if($warrantyPending > 0)
+                        <div class="mb-3">
+                            <label for="warranty_payment" class="form-label">Pago de Garantía (Pendiente: ${{ number_format($warrantyPending, 2) }})</label>
+                            <input type="number" step="0.01" max="{{ $warrantyPending }}" class="form-control" id="warranty_payment" wire:model="warranty_payment" placeholder="0.00">
+                            <small class="text-muted">Máximo: ${{ number_format($warrantyPending, 2) }}</small>
+                        </div>
+                        @endif
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -314,6 +353,14 @@
                 modal.hide();
             }
         });
+
+        Livewire.on('readingDeleted', function() {
+            Swal.fire(
+                '¡Eliminado!',
+                'La lectura de luz ha sido eliminada.',
+                'success'
+            );
+        });
     });
 
     function confirmDeleteReading(id) {
@@ -329,11 +376,6 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 @this.call('deleteReading', id);
-                Swal.fire(
-                    '¡Eliminado!',
-                    'La lectura de luz ha sido eliminada.',
-                    'success'
-                );
             }
         });
     }

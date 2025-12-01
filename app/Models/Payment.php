@@ -12,6 +12,7 @@ class Payment extends Model
     protected $fillable = [
         'amount',
         'payment_date',
+        'warranty_amount',
         'rent_id',
         'cashbox_id',
     ];

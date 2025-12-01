@@ -13,7 +13,7 @@ class RoomComponent extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
-    public $rentalprice, $parking_price, $number, $people_count, $type_id, $property_id, $room_id;
+    public $rentalprice, $parking_price, $warranty, $number, $people_count, $type_id, $property_id, $room_id;
     public $isEditMode = false;
     public $searchTerm;
     public $types = [];
@@ -75,6 +75,7 @@ class RoomComponent extends Component
     {
         $this->rentalprice = '';
         $this->parking_price = '';
+        $this->warranty = '';
         $this->number = '';
         $this->people_count = 1;
         $this->type_id = '';
@@ -104,6 +105,7 @@ class RoomComponent extends Component
         $data = [
             'rentalprice' => $this->rentalprice,
             'parking_price' => $this->parking_price,
+            'warranty' => $this->warranty,
             'number' => $this->number,
             'people_count' => $this->people_count,
             'type_id' => $this->type_id,
@@ -135,6 +137,7 @@ class RoomComponent extends Component
         $this->room_id = $id;
         $this->rentalprice = $room->rentalprice;
         $this->parking_price = $room->parking_price;
+        $this->warranty = $room->warranty;
         $this->number = $room->number;
         $this->people_count = $room->people_count;
         $this->type_id = $room->type_id;

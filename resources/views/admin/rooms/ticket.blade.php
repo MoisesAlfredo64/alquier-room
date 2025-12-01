@@ -54,10 +54,10 @@
     <div class="ticket">
         <div class="header">
             {{-- <img src="{{ public_path('logo.png') }}" alt="Logo"> --}}
-            <h4>Nombre de la Empresa</h4>
+            <h4>V.V. Villalba & Asociados</h4>
             <br>
-            <p>Dirección de la Empresa</p>
-            <p>Teléfono: (123) 456-7890</p>
+            <p>A 1 cuadra de Av. Peru, detras de la quinta el sol</p>
+            <p>Teléfono: 061-371629/0983-603900</p>
             <p>Fecha: {{ $payment->created_at->format('d/m/Y') }}</p>
         </div>
 
@@ -65,7 +65,7 @@
             <h2>Propiedad</h2>
             <p><strong>Nombre:</strong> {{$payment->rent->room->property->name}}</p>
             <p><strong>Cuidad:</strong> {{$payment->rent->room->property->city}}</p>
-            <p><strong>Dirección:</strong> {{$payment->rent->room->property->address}}</p>
+            <p><strong>Dirección:</strong> Al norte de Fortin Toledo Ed. Anabell</p>
         </div>
 
         <div class="section">
@@ -85,7 +85,6 @@
 
         <div class="footer">
             <p>Gracias por su pago</p>
-            <p>Visite nuestro sitio web: <a href="http://www.ejemplo.com">www.ejemplo.com</a></p>
         </div>
     </div>
 </body>

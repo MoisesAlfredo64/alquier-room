@@ -6,6 +6,7 @@ use App\Models\CashBox;
 use App\Models\Payment;
 use App\Models\Room;
 use App\Models\ElectricityReading;
+use App\Models\Income;
 use App\Exports\ElectricityReadingExport;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
@@ -22,6 +23,7 @@ class PaymentComponent extends Component
     public $searchTerm = '';
     public $amount;
     public $payment_date;
+    public $warranty_payment = 0;
     public $total = 0;
     
     // Propiedades para lectura de luz
@@ -38,6 +40,14 @@ class PaymentComponent extends Component
     public function mount($rent)
     {
         $this->rent = $rent;
+        $this->refreshRentData();
+    }
+
+    public function refreshRentData()
+    {
+        // Refrescar datos del rent desde la base de datos
+        $this->rent->refresh();
+        
         $room = Room::findOrFail($this->rent->room_id);
         $rentalPrice = $room->rentalprice;
         $parkingPrice = ($this->rent->uses_parking && $room->parking_price) ? $room->parking_price : 0;
@@ -53,6 +63,7 @@ class PaymentComponent extends Component
     {
         $this->amount = '';
         $this->payment_date = '';
+        $this->warranty_payment = 0;
         $this->reading_date = '';
         $this->initial_reading = '';
         $this->final_reading = '';
@@ -69,6 +80,16 @@ class PaymentComponent extends Component
             'amount' => 'required|numeric',
             'payment_date' => 'required|date'
         ]);
+
+        // Validar pago de garantía no exceda el pendiente
+        $warrantyTotal = $this->rent->room->warranty ?? 0;
+        $warrantyPaid = $this->rent->warranty_paid ?? 0;
+        $warrantyPending = $warrantyTotal - $warrantyPaid;
+        
+        if ($this->warranty_payment > $warrantyPending) {
+            session(null)->flash('warning', 'El pago de garantía no puede exceder el monto pendiente: $' . number_format($warrantyPending, 2));
+            return;
+        }
 
         // Obtener la última lectura de luz
         $lastReading = ElectricityReading::where('rent_id', $this->rent->id)
@@ -98,9 +119,23 @@ class PaymentComponent extends Component
             $payment = Payment::create([
                 'amount' => $this->amount,
                 'payment_date' => $this->payment_date,
+                'warranty_amount' => $this->warranty_payment ?? 0,
                 'rent_id' => $this->rent->id,
                 'cashbox_id' => $caja->id
             ]);
+
+            // Actualizar el total de garantía pagada en el alquiler
+            if ($this->warranty_payment > 0) {
+                $this->rent->warranty_paid = ($this->rent->warranty_paid ?? 0) + $this->warranty_payment;
+                $this->rent->save();
+                
+                // Registrar el pago de garantía como ingreso en la caja
+                Income::create([
+                    'amount' => $this->warranty_payment,
+                    'description' => 'Pago de garantía - ' . $this->rent->client->full_name . ' - Habitación N° ' . $this->rent->room->number,
+                    'cashbox_id' => $caja->id
+                ]);
+            }
 
             $pdfPath = route('payment.pdf', ['id' => Crypt::encrypt($payment->id)]);
 
@@ -108,6 +143,7 @@ class PaymentComponent extends Component
 
             $this->dispatch('paymentStored', ['pdfPath' => $pdfPath]);
 
+            $this->refreshRentData();
             $this->resetInputFields();
         } else {
             session(null)->flash('warning', 'La caja esta cerrada');

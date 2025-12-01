@@ -122,6 +122,11 @@
                                 wire:model="parking_price">
                         </div>
                         <div class="form-group col-md-6">
+                            <label for="warranty">Garantía</label>
+                            <input type="text" class="form-control" placeholder="Monto Garantía" id="warranty"
+                                wire:model="warranty">
+                        </div>
+                        <div class="form-group col-md-6">
                             <label for="number">Numero</label>
                             <input type="number" class="form-control" placeholder="Numero" id="number"
                                 wire:model="number">

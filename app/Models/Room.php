@@ -13,6 +13,7 @@ class Room extends Model
         'room_number',
         'rentalprice',
         'parking_price',
+        'warranty',
         'number',
         'people_count',
         'property_id',
