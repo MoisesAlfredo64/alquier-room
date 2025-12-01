@@ -56,7 +56,8 @@ class Principal extends Controller
         }
 
         $data = [
-            'totalRent' => Rent::count(),
+            // Mostrar solo las habitaciones ocupadas (rentas activas)
+            'totalRent' => Rent::where('status', 1)->count(),
             'totalRoom' => Room::count(),
             'totalClient' => Client::count(),
             'rentCounts' => $rentCounts,

@@ -13,7 +13,7 @@
 
     <link rel="stylesheet" href="{{asset('assets/admin/css/style.css')}}">
     <!-- End layout styles -->
-    <link rel="shortcut icon" href="{{asset('assets/admin/images/logo.png')}}" />
+    <link rel="shortcut icon" href="{{ asset('assets/images/apt_login.svg') }}" />
 </head>
 
 <body>
