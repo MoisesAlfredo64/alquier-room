@@ -21,10 +21,19 @@
     @endif
 
     @php
+        // Calcular total mensual considerando estacionamiento si aplica
+        $baseTotal = $rent->room->rentalprice;
+        $parking = ($rent->uses_parking && $rent->room->parking_price) ? $rent->room->parking_price : 0;
+        
+        // Obtener la última lectura de luz registrada (lastReading ya está cargada en el componente)
+        $electricityCost = $lastReading ? $lastReading->total_amount : 0;
+        
+        $total = $baseTotal + $parking + $electricityCost;
+
         // Suma total de los abonos
         $totalAbonos = $payments->sum('amount');
 
-        $contador = $totalAbonos / $total;
+        $contador = $total > 0 ? $totalAbonos / $total : 0;
 
         $meses = $contador;
 
@@ -33,6 +42,36 @@
         // Fecha final basada en el número de meses
         $fechaFinal = $fechaInicio->copy()->addMonths($meses);
     @endphp
+
+    <div class="alert alert-info mb-3">
+        <h5 class="mb-2">Desglose de Pago Mensual</h5>
+        <table class="table table-sm mb-0">
+            <tr>
+                <td><strong>Alquiler habitación:</strong></td>
+                <td class="text-end">${{ number_format($baseTotal, 2) }}</td>
+            </tr>
+            @if($parking > 0)
+            <tr>
+                <td><strong>Estacionamiento Extra:</strong></td>
+                <td class="text-end">${{ number_format($parking, 2) }}</td>
+            </tr>
+            @endif
+            <tr>
+                <td><strong>Consumo de Luz:</strong></td>
+                <td class="text-end">
+                    @if($electricityCost > 0)
+                        ${{ number_format($electricityCost, 2) }}
+                    @else
+                        <span class="text-danger">Pendiente</span>
+                    @endif
+                </td>
+            </tr>
+            <tr class="table-primary">
+                <td><strong>Total Mensual:</strong></td>
+                <td class="text-end"><strong>${{ number_format($total, 2) }}</strong></td>
+            </tr>
+        </table>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-striped">
@@ -143,8 +182,20 @@
                                     <td>${{ number_format($reading->total_amount, 2) }}</td>
                                     <td>
                                         <button wire:click="exportElectricityReading({{ $reading->id }})" 
-                                            class="btn btn-sm btn-success">
+                                            class="btn btn-sm btn-success" title="Exportar">
                                             <i class="fas fa-file-excel"></i>
+                                        </button>
+                                        <button wire:click="editReading({{ $reading->id }})" 
+                                            class="btn btn-sm btn-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#electricityModal"
+                                            title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="confirmDeleteReading({{ $reading->id }})" 
+                                            class="btn btn-sm btn-danger"
+                                            title="Eliminar">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -199,7 +250,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title" id="electricityModalLabel">Registrar Lectura de Luz</h5>
+                    <h5 class="modal-title" id="electricityModalLabel">{{ $isEditMode ? 'Editar' : 'Registrar' }} Lectura de Luz</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -245,7 +296,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-success" wire:click="storeElectricityReading">Guardar</button>
+                    <button type="button" class="btn btn-success" wire:click="storeElectricityReading">{{ $isEditMode ? 'Actualizar' : 'Guardar' }}</button>
                 </div>
             </div>
         </div>
@@ -270,4 +321,26 @@
             }
         });
     });
+
+    function confirmDeleteReading(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esto!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '¡Sí, eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.call('deleteReading', id);
+                Swal.fire(
+                    '¡Eliminado!',
+                    'La lectura de luz ha sido eliminada.',
+                    'success'
+                );
+            }
+        });
+    }
 </script>

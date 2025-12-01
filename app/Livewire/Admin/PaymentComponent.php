@@ -32,13 +32,16 @@ class PaymentComponent extends Component
     public $consumption = 0;
     public $electricity_amount = 0;
     public $lastReading;
+    public $reading_id;
+    public $isEditMode = false;
 
     public function mount($rent)
     {
         $this->rent = $rent;
         $room = Room::findOrFail($this->rent->room_id);
         $rentalPrice = $room->rentalprice;
-        $this->total = $rentalPrice;
+        $parkingPrice = ($this->rent->uses_parking && $room->parking_price) ? $room->parking_price : 0;
+        $this->total = $rentalPrice + $parkingPrice;
         
         // Obtener la última lectura del mes anterior
         $this->lastReading = ElectricityReading::where('rent_id', $this->rent->id)
@@ -56,6 +59,8 @@ class PaymentComponent extends Component
         $this->kwh_price = '';
         $this->consumption = 0;
         $this->electricity_amount = 0;
+        $this->reading_id = '';
+        $this->isEditMode = false;
     }
 
     public function storePayment()
@@ -63,6 +68,14 @@ class PaymentComponent extends Component
         $this->validate([
             'amount' => 'required|numeric'
         ]);
+
+        // Verificar si existe al menos una lectura de luz
+        $hasReading = ElectricityReading::where('rent_id', $this->rent->id)->exists();
+
+        if (!$hasReading) {
+            session(null)->flash('warning', 'Aun no se cargo pago de la luz');
+            return;
+        }
 
         //COMPORBAR CAJA
         $caja = CashBox::where('status', 1)->first();
@@ -110,7 +123,7 @@ class PaymentComponent extends Component
 
         $this->calculateConsumption();
 
-        $reading = ElectricityReading::create([
+        $data = [
             'client_id' => $this->rent->client_id,
             'rent_id' => $this->rent->id,
             'reading_date' => $this->reading_date,
@@ -119,11 +132,20 @@ class PaymentComponent extends Component
             'consumption' => $this->consumption,
             'kwh_price' => $this->kwh_price,
             'total_amount' => $this->electricity_amount
-        ]);
+        ];
+
+        if ($this->isEditMode) {
+            $reading = ElectricityReading::findOrFail($this->reading_id);
+            $reading->update($data);
+            $message = 'Lectura de luz actualizada exitosamente.';
+        } else {
+            $reading = ElectricityReading::create($data);
+            $message = 'Lectura de luz registrada exitosamente.';
+        }
 
         $this->lastReading = $reading;
         
-        session(null)->flash('message', 'Lectura de luz registrada exitosamente.');
+        session(null)->flash('message', $message);
         $this->dispatch('readingStored');
         $this->resetInputFields();
     }
@@ -131,6 +153,36 @@ class PaymentComponent extends Component
     public function exportElectricityReading($readingId)
     {
         return Excel::download(new ElectricityReadingExport($readingId), 'lectura_luz_' . $readingId . '.xlsx');
+    }
+
+    public function editReading($id)
+    {
+        $this->resetValidation();
+        $reading = ElectricityReading::findOrFail($id);
+        $this->reading_id = $id;
+        $this->reading_date = $reading->reading_date->format('Y-m-d');
+        $this->initial_reading = $reading->initial_reading;
+        $this->final_reading = $reading->final_reading;
+        $this->kwh_price = $reading->kwh_price;
+        $this->consumption = $reading->consumption;
+        $this->electricity_amount = $reading->total_amount;
+        $this->isEditMode = true;
+    }
+
+    public function deleteReading($id)
+    {
+        $reading = ElectricityReading::find($id);
+        if ($reading) {
+            $reading->delete();
+            
+            // Actualizar lastReading
+            $this->lastReading = ElectricityReading::where('rent_id', $this->rent->id)
+                ->orderBy('reading_date', 'desc')
+                ->first();
+            
+            session(null)->flash('message', 'Lectura de luz eliminada correctamente.');
+            $this->dispatch('readingDeleted');
+        }
     }
 
     public function render()

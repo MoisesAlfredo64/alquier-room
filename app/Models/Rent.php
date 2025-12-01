@@ -12,6 +12,7 @@ class Rent extends Model
     protected $fillable = [
         'rent_number',
         'note',
+        'uses_parking',
         'contract_photo',
         'client_id',
         'room_id',

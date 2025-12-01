@@ -24,6 +24,13 @@
         @endif
     </div>
 
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="uses_parking" wire:model="uses_parking">
+        <label class="form-check-label" for="uses_parking">
+            Usa estacionamiento extra
+        </label>
+    </div>
+
     <div class="btn-group" role="group" aria-label="Button group">
         <button class="btn btn-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalClient"><i
                 class="fas fa-plus-circle"></i> Nuevo Cliente</button>

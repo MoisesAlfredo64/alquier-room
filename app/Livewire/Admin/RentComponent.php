@@ -17,7 +17,7 @@ class RentComponent extends Component
 
     public $room;
     public $searchTerm;
-    public $full_name, $date_of_birth, $gender, $phone, $email, $address, $city, $state, $postal_code, $country, $identification_number, $identification_type, $note, $contract_photo, $client_id;
+    public $full_name, $date_of_birth, $gender, $phone, $email, $address, $city, $state, $postal_code, $country, $identification_number, $identification_type, $note, $contract_photo, $uses_parking = false, $client_id;
 
     public function mount(Room $room)
     {
@@ -118,6 +118,7 @@ class RentComponent extends Component
         $data = [
             'rent_number' => $rentNumber,
             'note' => $this->note,
+            'uses_parking' => (bool) $this->uses_parking,
             'client_id' => $this->client_id,
             'room_id' => $this->room->id
         ];

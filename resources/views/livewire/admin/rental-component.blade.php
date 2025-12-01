@@ -32,6 +32,10 @@
                             </div>
                             <h5 class="card-title fs-4">
                                 {{ $rent->room->rentalprice }} <span class="text-secondary">/ Mensual</span>
+                                @if($rent->uses_parking && $rent->room->parking_price)
+                                    <br>
+                                    <span class="badge bg-success">Estacionamiento Extra: ${{ $rent->room->parking_price }} / mes</span>
+                                @endif
                             </h5>
                             <ul class="list-unstyled">
                                 <li><b class="text-dark">Fecha:</b> {{ $rent->created_at }}</li>

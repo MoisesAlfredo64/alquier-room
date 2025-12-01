@@ -13,7 +13,7 @@ class RoomComponent extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
-    public $rentalprice, $number, $people_count, $type_id, $property_id, $room_id;
+    public $rentalprice, $parking_price, $number, $people_count, $type_id, $property_id, $room_id;
     public $isEditMode = false;
     public $searchTerm;
     public $types = [];
@@ -52,14 +52,21 @@ class RoomComponent extends Component
             ->orderBy('id', 'desc')
             ->paginate(9);
 
-        // Verifica si el room_id está en la tabla rents con status = 1
-        $rents = Rent::where('status', 1)
-            ->pluck('room_id')
-            ->toArray();
+        // Verifica si el room_id está en la tabla rents con status = 1 y obtiene nombre del cliente
+        $activeRents = Rent::with('client')
+            ->where('status', 1)
+            ->get();
+
+        $rents = $activeRents->pluck('room_id')->toArray();
+        $occupants = [];
+        foreach ($activeRents as $rent) {
+            $occupants[$rent->room_id] = $rent->client?->full_name;
+        }
 
         return view('livewire.admin.room-component', [
             'rooms' => $rooms,
             'rents' => $rents,
+            'occupants' => $occupants,
         ])
             ->extends('admin.layouts.app');
     }
@@ -67,6 +74,7 @@ class RoomComponent extends Component
     public function resetInputFields()
     {
         $this->rentalprice = '';
+        $this->parking_price = '';
         $this->number = '';
         $this->people_count = 1;
         $this->type_id = '';
@@ -95,6 +103,7 @@ class RoomComponent extends Component
 
         $data = [
             'rentalprice' => $this->rentalprice,
+            'parking_price' => $this->parking_price,
             'number' => $this->number,
             'people_count' => $this->people_count,
             'type_id' => $this->type_id,
@@ -125,6 +134,7 @@ class RoomComponent extends Component
         $room = Room::findOrFail($id);
         $this->room_id = $id;
         $this->rentalprice = $room->rentalprice;
+        $this->parking_price = $room->parking_price;
         $this->number = $room->number;
         $this->people_count = $room->people_count;
         $this->type_id = $room->type_id;

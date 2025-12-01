@@ -35,6 +35,9 @@
                             <ul class="list-unstyled">
                                 <li><b class="text-dark">Tipo:</b> {{ $room->type->name }}</li>
                                 <li><b class="text-dark">Personas:</b> {{ $room->people_count }}</li>
+                                @if (in_array($room->id, $rents))
+                                    <li><b class="text-dark">Ocupa:</b> {{ $occupants[$room->id] ?? '—' }}</li>
+                                @endif
                             </ul>
                             <div class="mb-2">
                                 <span class="badge bg-primary">{{ $room->room_number }}</span>
@@ -112,6 +115,11 @@
                             @error('rentalprice')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="parking_price">Precio Estacionamiento Extra</label>
+                            <input type="text" class="form-control" placeholder="Precio Estacionamiento" id="parking_price"
+                                wire:model="parking_price">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="number">Numero</label>
