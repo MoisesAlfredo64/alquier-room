@@ -6,15 +6,20 @@
     <div class="row">
             @if(!empty($proximosPagos) && count($proximosPagos) > 0)
                 <div class="row mt-4">
-                    <h4 class="mb-3">Habitaciones con fecha a vencer</h4>
+                    <h4 class="mb-3">Pagos Próximos a Vencer y Vencidos</h4>
                     @foreach($proximosPagos as $pago)
                         <div class="col-md-3 mb-3">
-                            <div class="card border-primary shadow h-100">
+                            <div class="card {{ $pago['is_overdue'] ? 'border-danger' : 'border-warning' }} shadow h-100">
                                 <div class="card-body">
+                                    @if($pago['is_overdue'])
+                                        <span class="badge bg-danger mb-2">VENCIDO</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark mb-2">PRÓXIMO A VENCER</span>
+                                    @endif
                                     <h5 class="card-title">Habitación Nº {{ $pago['room_number'] }}</h5>
                                     <p class="mb-1"><strong>Inquilino:</strong> {{ $pago['client_name'] }}</p>
                                     <p class="mb-1"><strong>Monto alquiler:</strong> ${{ formatNumber($pago['rental_price']) }}</p>
-                                    <p class="mb-1"><strong>Fecha límite de pago:</strong> {{ $pago['due_date'] }}</p>
+                                    <p class="mb-1"><strong>Fecha límite de pago:</strong> <span class="{{ $pago['is_overdue'] ? 'text-danger fw-bold' : '' }}">{{ $pago['due_date'] }}</span></p>
                                 </div>
                             </div>
                         </div>

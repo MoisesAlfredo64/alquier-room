@@ -65,8 +65,9 @@ class Principal extends Controller
             'months' => $labels
         ];
 
-        // Habitaciones con pagos pendientes (fecha de vencimiento ya pasó)
+        // Habitaciones con pagos próximos a vencer (7 días antes) o ya vencidos
         $today = now();
+        $sevenDaysLater = $today->copy()->addDays(7);
         $proximosPagos = [];
         $rentsWithRoom = Rent::with(['room', 'client', 'payments'])
             ->where('status', 1)
@@ -77,15 +78,19 @@ class Principal extends Controller
             $lastPayment = $rent->payments->sortByDesc('created_at')->first();
             // Si no hay pagos, usar la fecha de creación del alquiler
             $lastDate = $lastPayment ? $lastPayment->created_at : $rent->created_at;
-            // Suponiendo que el pago es mensual
+            // Calcular la próxima fecha de vencimiento (1 mes después del último pago)
             $nextDueDate = \Carbon\Carbon::parse($lastDate)->addMonth();
-            // Mostrar solo si la fecha de vencimiento ya pasó (pago pendiente)
-            if ($nextDueDate->isPast()) {
+            
+            // Mostrar si:
+            // 1. Ya venció (está en el pasado)
+            // 2. Está dentro de los próximos 7 días
+            if ($nextDueDate->isPast() || $nextDueDate->between($today, $sevenDaysLater)) {
                 $proximosPagos[] = [
                     'room_number' => $rent->room->number,
                     'client_name' => $rent->client->full_name,
                     'rental_price' => $rent->room->rentalprice,
-                    'due_date' => $nextDueDate->format('d/m/Y')
+                    'due_date' => $nextDueDate->format('d/m/Y'),
+                    'is_overdue' => $nextDueDate->isPast() // Indicador si ya venció
                 ];
             }
         }
