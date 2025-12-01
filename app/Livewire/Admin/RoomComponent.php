@@ -104,8 +104,8 @@ class RoomComponent extends Component
 
         $data = [
             'rentalprice' => $this->rentalprice,
-            'parking_price' => $this->parking_price,
-            'warranty' => $this->warranty,
+            'parking_price' => $this->parking_price ?: null,
+            'warranty' => $this->warranty ?: null,
             'number' => $this->number,
             'people_count' => $this->people_count,
             'type_id' => $this->type_id,
@@ -114,8 +114,10 @@ class RoomComponent extends Component
 
         // Generar room_number si es nueva habitación
         if (!$this->isEditMode) {
-            $maxRoomCount = Room::count();
-            $data['room_number'] = 'R-' . str_pad($maxRoomCount + 1, 3, '0', STR_PAD_LEFT);
+            // Obtener el último número de habitación
+            $lastRoom = Room::orderByRaw('CAST(SUBSTRING(room_number, 3) AS UNSIGNED) DESC')->first();
+            $nextNumber = $lastRoom ? intval(substr($lastRoom->room_number, 2)) + 1 : 1;
+            $data['room_number'] = 'R-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
         }
 
         Room::updateOrCreate(

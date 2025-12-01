@@ -112,8 +112,9 @@ class RentComponent extends Component
         ]);
 
         // Generar rent_number automático (ALQ-0001, ALQ-0002, etc.)
-        $maxRentCount = Rent::count();
-        $rentNumber = 'ALQ-' . str_pad($maxRentCount + 1, 4, '0', STR_PAD_LEFT);
+        $lastRent = Rent::orderByRaw('CAST(SUBSTRING(rent_number, 5) AS UNSIGNED) DESC')->first();
+        $nextNumber = $lastRent ? intval(substr($lastRent->rent_number, 4)) + 1 : 1;
+        $rentNumber = 'ALQ-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
         $data = [
             'rent_number' => $rentNumber,
