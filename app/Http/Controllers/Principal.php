@@ -65,9 +65,8 @@ class Principal extends Controller
             'months' => $labels
         ];
 
-        // Habitaciones próximas a pago (faltan 5 días)
+        // Habitaciones con pagos pendientes (fecha de vencimiento ya pasó)
         $today = now();
-        $limitDate = $today->copy()->addDays(5);
         $proximosPagos = [];
         $rentsWithRoom = Rent::with(['room', 'client', 'payments'])
             ->where('status', 1)
@@ -80,7 +79,8 @@ class Principal extends Controller
             $lastDate = $lastPayment ? $lastPayment->created_at : $rent->created_at;
             // Suponiendo que el pago es mensual
             $nextDueDate = \Carbon\Carbon::parse($lastDate)->addMonth();
-            if ($nextDueDate->isBetween($today, $limitDate)) {
+            // Mostrar solo si la fecha de vencimiento ya pasó (pago pendiente)
+            if ($nextDueDate->isPast()) {
                 $proximosPagos[] = [
                     'room_number' => $rent->room->number,
                     'client_name' => $rent->client->full_name,
