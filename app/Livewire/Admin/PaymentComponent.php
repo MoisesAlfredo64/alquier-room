@@ -66,14 +66,28 @@ class PaymentComponent extends Component
     public function storePayment()
     {
         $this->validate([
-            'amount' => 'required|numeric'
+            'amount' => 'required|numeric',
+            'payment_date' => 'required|date'
         ]);
 
-        // Verificar si existe al menos una lectura de luz
-        $hasReading = ElectricityReading::where('rent_id', $this->rent->id)->exists();
+        // Obtener la última lectura de luz
+        $lastReading = ElectricityReading::where('rent_id', $this->rent->id)
+            ->orderBy('reading_date', 'desc')
+            ->first();
+        
+        // Validar que exista una lectura con importe mayor a cero
+        if (!$lastReading || $lastReading->total_amount == 0) {
+            session(null)->flash('warning', 'Debe ingresar el importe de luz primero');
+            return;
+        }
 
-        if (!$hasReading) {
-            session(null)->flash('warning', 'Aun no se cargo pago de la luz');
+        // Validar que la fecha de pago coincida con la fecha de lectura de luz
+        $readingDate = \Carbon\Carbon::parse($lastReading->reading_date)->format('Y-m-d');
+        $paymentDate = \Carbon\Carbon::parse($this->payment_date)->format('Y-m-d');
+        
+        if ($readingDate !== $paymentDate) {
+            $formattedDate = \Carbon\Carbon::parse($lastReading->reading_date)->format('d/m/Y');
+            session(null)->flash('warning', 'La fecha de pago debe coincidir con la fecha de lectura de luz (' . $formattedDate . ')');
             return;
         }
 
@@ -83,6 +97,7 @@ class PaymentComponent extends Component
 
             $payment = Payment::create([
                 'amount' => $this->amount,
+                'payment_date' => $this->payment_date,
                 'rent_id' => $this->rent->id,
                 'cashbox_id' => $caja->id
             ]);
@@ -153,6 +168,18 @@ class PaymentComponent extends Component
     public function exportElectricityReading($readingId)
     {
         return Excel::download(new ElectricityReadingExport($readingId), 'lectura_luz_' . $readingId . '.xlsx');
+    }
+
+    public function exportAllElectricityReadings()
+    {
+        $readings = ElectricityReading::where('rent_id', $this->rent->id)
+            ->orderBy('reading_date', 'desc')
+            ->get();
+        
+        return Excel::download(
+            new \App\Exports\AllElectricityReadingsExport($this->rent->id),
+            'lecturas_luz_' . $this->rent->client->full_name . '_' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     public function editReading($id)

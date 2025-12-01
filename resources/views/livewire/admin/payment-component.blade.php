@@ -2,6 +2,12 @@
     @php
         use Carbon\Carbon;
     @endphp
+    
+    <div class="mb-3">
+        <h5>Inquilino: <strong>{{ $rent->client->full_name }}</strong></h5>
+        <p class="text-muted mb-0">Fecha de ingreso: {{ Carbon::parse($rent->created_at)->format('d/m/Y') }}</p>
+    </div>
+    
     <div class="row mb-4">
         <div class="col-md-6">
             <input type="text" wire:model.live="searchTerm" class="form-control" placeholder="Buscar...">
@@ -37,10 +43,16 @@
 
         $meses = $contador;
 
-        $fechaInicio = Carbon::parse($rent->created_at);
+        // Calcular fecha final basada en la última fecha de pago más los meses restantes
+        $lastPayment = $payments->sortByDesc('payment_date')->first();
+        if ($lastPayment && $lastPayment->payment_date) {
+            $fechaInicio = Carbon::parse($lastPayment->payment_date);
+        } else {
+            $fechaInicio = Carbon::parse($rent->created_at);
+        }
 
         // Fecha final basada en el número de meses
-        $fechaFinal = $fechaInicio->copy()->addMonths($meses);
+        $fechaFinal = $fechaInicio->copy()->addMonths(1);
     @endphp
 
     <div class="alert alert-info mb-3">
@@ -77,7 +89,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Fecha</th>
+                    <th>Fecha de Pago</th>
                     <th>Monto</th>
                     <th>Acción</th>
                 </tr>
@@ -90,10 +102,7 @@
                 @else
                     @foreach ($payments as $payment)
                         <tr>
-                            <td>{{ Carbon::parse($payment['created_at'])->format('d') }} de
-                                {{ Carbon::parse($payment['created_at'])->translatedFormat('F') }} de
-                                {{ Carbon::parse($payment['created_at'])->format('Y') }} a las
-                                {{ Carbon::parse($payment['created_at'])->format('H:i') }}</td>
+                            <td>{{ $payment->payment_date ? Carbon::parse($payment->payment_date)->format('d/m/Y') : Carbon::parse($payment->created_at)->format('d/m/Y') }}</td>
                             <td>{{ $payment['amount'] }}</td>
                             <td>
                                 <a target="_blank" href="{{ route('payment.pdf', Crypt::encrypt($payment->id)) }}"
@@ -105,12 +114,6 @@
                         <td><b>Total Abonos:</b></td>
                         <td colspan="2">
                             <h4>{{ $totalAbonos }}</h4>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><b>Meses:</b></td>
-                        <td colspan="2">
-                            <h4>{{ number_format($contador, 2) }}</h4>
                         </td>
                     </tr>
                     <tr>
@@ -152,6 +155,9 @@
                 wire:click="resetInputFields">
                 <i class="fas fa-bolt"></i> Registrar Lectura de Luz
             </button>
+            <button class="btn btn-success mb-3 ms-2" wire:click="exportAllElectricityReadings">
+                <i class="fas fa-file-excel"></i> Exportar Todas las Lecturas
+            </button>
 
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -163,13 +169,12 @@
                             <th>Consumo (KWH)</th>
                             <th>Precio KWH</th>
                             <th>Importe</th>
-                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if ($electricityReadings->isEmpty())
                             <tr>
-                                <td colspan="7" class="text-center">No hay lecturas registradas.</td>
+                                <td colspan="6" class="text-center">No hay lecturas registradas.</td>
                             </tr>
                         @else
                             @foreach ($electricityReadings as $reading)
@@ -180,24 +185,6 @@
                                     <td>{{ number_format($reading->consumption, 2) }}</td>
                                     <td>${{ number_format($reading->kwh_price, 2) }}</td>
                                     <td>${{ number_format($reading->total_amount, 2) }}</td>
-                                    <td>
-                                        <button wire:click="exportElectricityReading({{ $reading->id }})" 
-                                            class="btn btn-sm btn-success" title="Exportar">
-                                            <i class="fas fa-file-excel"></i>
-                                        </button>
-                                        <button wire:click="editReading({{ $reading->id }})" 
-                                            class="btn btn-sm btn-primary" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#electricityModal"
-                                            title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button onclick="confirmDeleteReading({{ $reading->id }})" 
-                                            class="btn btn-sm btn-danger"
-                                            title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
                                 </tr>
                             @endforeach
                         @endif
@@ -227,6 +214,13 @@
                         </div>
                     @endif
                     <form>
+                        <div class="mb-3">
+                            <label for="payment_date" class="form-label">Fecha de Pago</label>
+                            <input type="date" class="form-control" id="payment_date" wire:model="payment_date">
+                            @error('payment_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
                         <div class="mb-3">
                             <label for="amount" class="form-label">Monto</label>
                             <input type="number" class="form-control" id="amount" wire:model="amount">
